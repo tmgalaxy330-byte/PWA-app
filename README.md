@@ -1,6 +1,8 @@
 # ロジトレ(logitore)
 
-ロジカルシンキングの思考ノートとドリルの PWA(試作版・検討中/ver未確定)。
+ロジカルシンキングの思考ノートとドリルの PWA(v1.0)。
+
+- 公開先:https://tmgalaxy330-byte.github.io/PWA-app/(GitHub Pages)
 
 - 開発ルール・構成:`CLAUDE.md`
 - 最新の引き継ぎ:`docs/handoff/`

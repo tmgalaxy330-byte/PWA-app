@@ -1,6 +1,6 @@
-/* ロジトレ Service Worker(検討中・ver未確定)
+/* ロジトレ Service Worker(v1.0)
    リリースのたびに CACHE の名前を変える。変えないと端末側で更新が検知されない。 */
-const CACHE = 'logitore-trial-3';
+const CACHE = 'logitore-v1.0';
 const ASSETS = [
   './',
   './index.html',
