@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ロジトレ 取扱説明書</title>
+<!-- 取扱説明書(検討中・ver未確定) -->
+<style>
+[data-theme=light]{--bg:#FAFAF9;--bg2:#FFFFFF;--bg3:#F1F0EC;--tx:#111110;--sub:#6B6A65;--ln:#E6E5E1;--ln2:#D3D1C7}
+[data-theme=dark]{--bg:#0E0E0D;--bg2:#171716;--bg3:#1F1F1D;--tx:#EDEDEA;--sub:#8F8E88;--ln:#262624;--ln2:#3A3A36}
+:root{--ac:#378ADD;--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.85;font-feature-settings:"palt"}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:var(--bg);border-bottom:.5px solid var(--ln)}
+.bar b{font-weight:500;font-size:.95rem}
+.bar .tag{font-family:var(--mono);font-size:.65rem;color:var(--sub);margin-left:auto}
+.tog{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--sub);padding:.35rem .6rem;border:.5px solid var(--ln2);border-radius:8px}
+.wrap{display:flex;max-width:1100px;margin:0 auto}
+nav{position:sticky;top:3.1rem;align-self:flex-start;width:250px;flex:none;max-height:calc(100dvh - 3.1rem);overflow:auto;padding:1rem .5rem 2rem 1rem;border-right:.5px solid var(--ln);transition:width .25s,padding .25s,opacity .2s}
+nav.min{width:0;padding:0;opacity:0;overflow:hidden;border:0}
+nav a{display:block;color:var(--sub);text-decoration:none;font-size:.82rem;padding:.35rem .6rem;border-radius:6px;line-height:1.5}
+nav a.l2{padding-left:1.4rem;font-size:.76rem}
+nav a:hover,nav a.on{color:var(--tx);background:var(--bg3)}
+main{flex:1;min-width:0;padding:1rem 1.5rem 5rem;max-width:760px}
+h1{font-size:1.6rem;font-weight:500;margin:1rem 0 .3rem}
+h2{font-size:1.15rem;font-weight:500;margin:2.6rem 0 .6rem;padding-top:.6rem;border-top:.5px solid var(--ln)}
+h3{font-size:.98rem;font-weight:500;margin:1.6rem 0 .4rem}
+p,li{font-size:.92rem}
+.sub{color:var(--sub)}
+.k{font-family:var(--mono);font-size:.7rem;color:var(--ac);letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.6rem 0}
+th,td{border-bottom:.5px solid var(--ln);padding:.5rem .4rem;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--sub);font-size:.78rem}
+kbd{font-family:var(--mono);font-size:.75rem;border:.5px solid var(--ln2);border-radius:4px;padding:0 .3rem;background:var(--bg3)}
+.note{border-left:2px solid var(--ac);padding:.2rem 0 .2rem .9rem;margin:1rem 0;color:var(--sub);font-size:.88rem}
+.warn{border-left:2px solid #E5534B;padding:.2rem 0 .2rem .9rem;margin:1rem 0;font-size:.88rem}
+@media(max-width:760px){nav{position:fixed;top:3.1rem;left:0;bottom:0;z-index:9;background:var(--bg2);width:78vw;max-height:none;box-shadow:none;border-right:.5px solid var(--ln2)}nav.min{width:0}main{padding:1rem 1.15rem 5rem}}
+</style>
+</head>
+<body>
+<div class="bar"><button class="tog" id="tog" aria-expanded="true" aria-controls="toc">☰ 目次</button><b>ロジトレ 取扱説明書</b><span class="tag">検討中(ver未確定)</span></div>
+<div class="wrap">
+<nav id="toc" aria-label="目次">
+<a href="#intro">1. はじめに</a>
+<a href="#install">2. インストール</a>
+<a href="#home">3. ホーム画面</a>
+<a href="#home-ops" class="l2">スワイプ・長押し</a>
+<a href="#create">4. 思考を作る</a>
+<a href="#diag" class="l2">迷ったら診断</a>
+<a href="#usage" class="l2">使い方とサンプル</a>
+<a href="#pros" class="l2">メリデメ比較</a>
+<a href="#editor">5. 作業画面</a>
+<a href="#outline" class="l2">アウトライン表示</a>
+<a href="#tree" class="l2">ツリー表示</a>
+<a href="#keys" class="l2">キーボード操作</a>
+<a href="#panel" class="l2">プロパティパネル</a>
+<a href="#mece">6. MECEチェック</a>
+<a href="#ai">7. AIに提出</a>
+<a href="#drill">8. ドリル</a>
+<a href="#data">9. データの保存とバックアップ</a>
+<a href="#back">10. 「戻る」ボタンの動き</a>
+<a href="#settings">11. 設定</a>
+<a href="#pin" class="l2">PINロック</a>
+<a href="#errors">12. エラーログ</a>
+<a href="#faq">13. 困ったとき</a>
+<a href="#history">14. 更新履歴</a>
+</nav>
+<main>
+<h1 id="intro">ロジトレ 取扱説明書</h1>
+<p class="sub">ロジカルシンキング(筋道を立てて考える力)を、実際の悩みの整理と毎日のドリルで鍛えるアプリです。</p>
+<p>このアプリでできることは大きく3つです。</p>
+<ul><li><b>思考ノート</b>:悩みや課題を「型」に沿って分解・整理する(6種類の型、使い方・サンプル付き)</li><li><b>AIに提出</b>:整理した内容をAIに渡して、論理の穴を指摘してもらう</li><li><b>ドリル</b>:1日5問で、論理の基本を練習する</li></ul>
+<p class="note">データはすべてこの端末の中に保存され、外部へ自動送信されることはありません。</p>
+
+<h2 id="install">2. インストール</h2>
+<p>Android の Chrome でアプリのページを開き、メニュー(︙)から「アプリをインストール」または「ホーム画面に追加」を選びます。ホーム画面のアイコンから起動すると、普通のアプリと同じように全画面で使えます。</p>
+<p>インストールして使うと、次の利点があります。</p>
+<ul><li>電波のない場所でも使える</li><li>ブラウザがデータを自動で削除しにくくなる(設定 →「保存領域の保護」で状態を確認できます)</li><li>他のアプリの「共有」からロジトレに文章を送れる</li></ul>
+<p>PC では Chrome / Edge のアドレスバー右側のインストールボタンから同様にインストールできます。</p>
+
+<h2 id="home">3. ホーム画面</h2>
+<p>アプリを開くと最初に表示される、思考の一覧です。</p>
+<table><tr><th>場所</th><th>内容</th></tr>
+<tr><td>左上 ☰</td><td>メニュー(ホーム・ドリル・ゴミ箱・設定・取扱説明書・用語集)</td></tr>
+<tr><td>右上 🔍</td><td>検索。タイトルだけでなく、項目の中身やメモも検索します</td></tr>
+<tr><td>右上 ☀/☾</td><td>ライト/ダークの切り替え</td></tr>
+<tr><td>お知らせ行</td><td>前回までのエラーや、書き出し(バックアップ)の催促がある時だけ表示されます</td></tr>
+<tr><td>今日のドリル</td><td>5本の線が今日の進み具合です。streak は連続日数です</td></tr>
+<tr><td>タブ</td><td>すべて/下書き/検討中/完了で絞り込み</td></tr>
+<tr><td>並び順</td><td>更新日順・作成日順・タイトル順。ピン留めした思考は常に上に表示されます</td></tr>
+<tr><td>右下 ＋</td><td>新しい思考を作成</td></tr></table>
+<h3 id="home-ops">スワイプ・長押し</h3>
+<ul><li><b>左へスワイプ</b>:「複製」「削除」ボタンが出ます。画面の端から始めると Android の「戻る」ジェスチャーと判定されるため、少し内側から指を動かしてください。</li><li><b>長押し</b>:開く・ピン留め・複製・状態の変更・ゴミ箱へ移動のメニューが出ます。PC では右クリックでも開きます。</li></ul>
+<p>削除した思考はゴミ箱に入り、30日間は復元できます。</p>
+
+<h2 id="create">4. 思考を作る</h2>
+<p>右下の ＋ を押し、テンプレート(型)を選びます。どれを選べばよいか迷ったら、一番上の「迷ったら診断」を押してください。</p>
+<table><tr><th>型</th><th>こんなときに</th><th>構成</th></tr>
+<tr><td>Whyツリー</td><td>問題の原因を突き止めたい</td><td>問題 → 原因 → 深い原因</td></tr>
+<tr><td>Howツリー</td><td>目標を達成する方法を洗い出したい</td><td>目的 → 手段 → 具体策</td></tr>
+<tr><td>ピラミッド</td><td>主張を人に伝えたい・説得したい</td><td>結論 → 理由 → 根拠</td></tr>
+<tr><td>空・雨・傘</td><td>状況を見て、何をするか決めたい</td><td>事実 → 解釈 → 行動</td></tr>
+<tr><td>メリデメ比較</td><td>複数の選択肢で迷っている</td><td>比較テーマ → 選択肢 → メリット/デメリット</td></tr>
+<tr><td>白紙</td><td>まだ考えがまとまっていない</td><td>テーマ → 項目</td></tr></table>
+<h3 id="diag">迷ったら診断</h3>
+<p>「何をしたいですか?」などの質問に1〜2問答えると、合う型をすすめます。結果画面から、そのまま作成したり使い方を見たりできます。</p>
+<h3 id="usage">使い方(ⓘ)とサンプル</h3>
+<p>テンプレート一覧の右端の ⓘ を押すと、その型の「目的・手順・記入例・よくある失敗・次にやること」が表示されます。</p>
+<p>「サンプルを見る」では、ビジネスの場面を題材にした記入済みの見本を確認できます。「この見本をコピーして始める」を押すと、見本を複製した思考が作られ、自由に書き換えられます。</p>
+<p class="note">サンプル内の数値はすべて架空のものです。</p>
+<h3 id="pros">メリデメ比較の使い方</h3>
+<p>最初は選択肢が2つ(それぞれメリット/デメリット付き)用意されています。3つ以上を比べたいときは「選択肢を追加」を押すと、メリット/デメリットの枠ごと追加されます。</p>
+<p>何も入力せずに作業画面を離れると、その思考は自動で削除されます。以前の試作で作った「ロジックツリー」は、自動で「Whyツリー」として扱われます。</p>
+
+<h2 id="editor">5. 作業画面</h2>
+<p>上部のボタンは左から「戻る」「保存状態」「元に戻す」「やり直す」「プロパティ」「その他」です。</p>
+<p>入力は自動で保存されます。保存状態は「保存中…」→「✓ 保存済み」と表示されます。アプリを切り替えたり画面を消したりした瞬間にも保存します。</p>
+<p class="note">「元に戻す」の履歴は、アプリを閉じると消えます。</p>
+<h3 id="outline">アウトライン表示</h3>
+<p>箇条書きのように、字下げで階層を表します。スマホでの編集に向いた表示です。</p>
+<ul><li>項目をタップすると入力でき、画面下に<b>操作バー</b>(下に追加・同階層・右へ・左へ・上へ・下へ・削除)が出ます</li><li>項目左の <b>⋮⋮</b> をタップすると操作メニュー、上下にドラッグすると同じ階層の中で並べ替えができます</li><li>▼ を押すと、その下の項目を折りたためます</li><li>各項目の左の小さなラベル(結論・理由など)は、その項目の役割です</li></ul>
+<h3 id="tree">ツリー表示</h3>
+<p>全体の構造を図で確認するための表示です。− / ＋ で縮小・拡大できます。項目をタップすると、アウトライン表示のその項目に移動して編集できます。</p>
+<h3 id="keys">キーボード操作(PC・外付けキーボード)</h3>
+<table><tr><th>キー</th><th>動作</th></tr>
+<tr><td><kbd>Enter</kbd></td><td>同じ階層に項目を追加(日本語の変換確定中は反応しません)</td></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>1段下げる / 1段上げる</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>↑</kbd><kbd>↓</kbd></td><td>項目を上下に移動</td></tr>
+<tr><td><kbd>↑</kbd><kbd>↓</kbd></td><td>前後の項目へ移動</td></tr>
+<tr><td>空の項目で <kbd>Backspace</kbd></td><td>項目を削除</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>元に戻す / やり直す</td></tr></table>
+<h3 id="panel">プロパティパネル</h3>
+<p>上部の □ ボタンで開閉します。スマホでは下から出るシートになり、上部のつまみや ↑ ボタンで「半分 ⇔ 全画面」を切り替え、× で最小化します。PC では右側に表示され、× で隠せます。</p>
+<p>パネルには、状態(下書き・検討中・完了)、MECEチェックリスト、メモ、AIレビューの履歴、項目数などの情報があります。状態を「完了」にすると紙吹雪でお祝いします。</p>
+<p>「その他」メニューの<b>集中モード</b>では、パネルとメニューを隠して思考だけを表示します。「集中モード終了」ボタンか「戻る」で元に戻ります。</p>
+
+<h2 id="mece">6. MECEチェック</h2>
+<p>MECE は「漏れなく、ダブりなく」という意味です。パネルの3つのチェック項目(漏れ・ダブり・粒度)を、自分の目で確認しながらチェックしてください。</p>
+<p>「自動チェック」では、次のような<b>形式上の問題</b>だけを機械的に見つけます。</p>
+<ul><li>未入力の項目</li><li>下の階層が1つしかない項目(分解に漏れがある可能性)</li><li>同じ階層に同じ文言が重複している</li></ul>
+<p class="note">内容として漏れやダブりがないかは、自動では判断できません。AIに提出して指摘してもらうのも有効です。</p>
+
+<h2 id="ai">7. AIに提出</h2>
+<ol><li>パネルまたは「その他」メニューから「AIに提出」を開きます</li><li>依頼の種類(厳しめ・やさしめ・MECE確認・反論)を選びます</li><li>「コピー」を押し、Claude などのAIチャットに貼り付けて送信します(「共有」で直接アプリを選ぶこともできます)</li><li>AIの返答をコピーし、下の欄に貼り付けて「返答を保存」を押すと、パネルに履歴として残ります</li></ol>
+<p class="note">アプリ自体はAIと通信しません。AIに渡す内容は、あなたがコピー・共有した文章だけです。</p>
+
+<h2 id="drill">8. ドリル</h2>
+<p>ホームの「今日のドリル」から始めます。毎日5問が日付ごとに選ばれます。途中でやめても、続きから再開できます。</p>
+<ul><li>不正解のときは画面が横に揺れ、解説が表示されます</li><li>5問をすべて解くと連続日数(streak)が増えます。1日空くと0に戻ります</li><li>終わった後は「もっと練習する」でランダムな5問を解けます(連続日数には影響しません)</li><li>結果画面で、正答率と直近14日の推移を確認できます</li></ul>
+
+<h2 id="data">9. データの保存とバックアップ</h2>
+<p>データは端末のブラウザ領域に保存されます。スマホとPCのデータは自動ではつながりません。</p>
+<h3>書き出し</h3>
+<p>設定 →「書き出し」で、すべての思考・ゴミ箱・ドリル記録を1つのファイル(.json)として保存します。ファイルはダウンロードフォルダに保存されます。設定した日数(初期値7日)書き出しをしていないと、ホームでお知らせが表示されます。</p>
+<h3>読み込み</h3>
+<p>設定 →「読み込み」で書き出したファイルを選び、方法を選びます。</p>
+<table><tr><th>方法</th><th>動作</th></tr><tr><td>統合</td><td>今のデータを残し、ファイルにしかない思考を追加します。同じ思考は更新日時が新しいほうを採用します</td></tr><tr><td>上書き</td><td>今の思考・ゴミ箱・ドリル記録を、ファイルの内容に置き換えます(設定とPINは変わりません)</td></tr></table>
+<div class="warn">スマホとPCの両方で同じ思考を編集してから「上書き」すると、片方の変更が消えます。迷ったら「統合」を使ってください。</div>
+<h3>画像で書き出し</h3>
+<p>作業画面の「その他」→「画像で書き出し」で、思考を PNG 画像として保存できます。</p>
+
+<h2 id="back">10. 「戻る」ボタンの動き</h2>
+<table><tr><th>今の状態</th><th>「戻る」を押すと</th></tr>
+<tr><td>メニュー・シート・確認画面が開いている</td><td>それを閉じるだけ</td></tr>
+<tr><td>作業画面</td><td>1回目:「もう一度でホームへ」と表示 → 3秒以内にもう1回:ホームへ戻る</td></tr>
+<tr><td>ドリル・設定・ゴミ箱</td><td>ホームへ戻る</td></tr>
+<tr><td>ホーム</td><td>1回目:「もう一度で終了」と表示 → 3秒以内にもう1回:アプリを終了</td></tr></table>
+<p>確認は設定 →「戻る」の確認 でオフにできます。オフにすると1回で戻ります。</p>
+<p class="note">スリーボタンの「戻る」と、画面端からのスワイプ(戻るジェスチャー)は区別できないため、どちらでも同じ動きになります。ホームボタン(○)やアプリ切替(□)は止められませんが、その瞬間に自動保存されます。</p>
+
+<h2 id="settings">11. 設定</h2>
+<table><tr><th>項目</th><th>内容</th></tr>
+<tr><td>テーマ</td><td>ライト/ダーク/端末に合わせる</td></tr>
+<tr><td>アクセント色</td><td>ブルー/ティール/コーラル</td></tr>
+<tr><td>文字サイズ</td><td>小/標準/大/特大</td></tr>
+<tr><td>動きを減らす</td><td>アニメーションをほぼ止めます</td></tr>
+<tr><td>「戻る」の確認</td><td>上の「戻る」ボタンの動きを参照</td></tr>
+<tr><td>PINロック</td><td>下の「PINロック」を参照</td></tr>
+<tr><td>書き出し/読み込み/書き出しの催促</td><td>「データの保存とバックアップ」を参照</td></tr>
+<tr><td>保存領域の保護</td><td>ブラウザに「容量不足でもデータを消さないで」と申請します。許可されるかはブラウザが判断します</td></tr>
+<tr><td>すべてのデータを削除</td><td>2回の確認の後、すべてを初期化します</td></tr>
+<tr><td>更新を確認</td><td>新しいバージョンがあれば「更新」ボタンが表示されます</td></tr></table>
+<h3 id="pin">PINロック</h3>
+<p>オンにすると、起動時と、アプリから1分以上離れて戻ったときに4桁のPINを求めます。</p>
+<div class="warn">PINは端末内にしか保存されていないため、忘れると復元できません。その場合はデータを初期化する必要があります(書き出したファイルがあれば初期化後に読み込めます)。また、PINロックは画面ののぞき見を防ぐためのもので、端末を分解・解析するような攻撃からデータを守る暗号化ではありません。</div>
+
+<h2 id="errors">12. エラーログ</h2>
+<p>アプリの使用中にエラーが起きると、その場で通知され、内容がログとして保存されます。次にアプリを開いたとき、ホームのお知らせ行に「エラー n件」と表示されます。</p>
+<p>設定 →「エラーログ」で内容を確認できます。「内容をコピー」で開発者に伝えるための文章をコピーできます。</p>
+
+<h2 id="faq">13. 困ったとき</h2>
+<h3>データが消えてしまった</h3>
+<p>書き出したファイルがあれば、設定 →「読み込み」で復元できます。ブラウザの「サイトデータを削除」を行うとアプリのデータも消えるので注意してください。</p>
+<h3>新しいバージョンにならない</h3>
+<p>設定 →「更新を確認」を押してください。表示された「更新」を押すと再読み込みされます。</p>
+<h3>共有から送ったのに何も起きない</h3>
+<p>共有メニューにロジトレが表示されるのは、アプリをインストールしている場合だけです(対応状況は端末・ブラウザにより異なります)。</p>
+
+<h2 id="history">14. 更新履歴</h2>
+<table><tr><th>版</th><th>内容</th></tr>
+<tr><td>検討中(ver未確定)<br><span class="sub">trial-2</span></td><td>テンプレートを6種類に再構成(ロジックツリーをWhyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</td></tr>
+<tr><td>検討中(ver未確定)<br><span class="sub">trial-1</span></td><td>試作版。ホーム、作業画面(アウトライン/ツリー)、プロパティパネル、MECEチェック、AIに提出、ドリル、ゴミ箱、設定、書き出し/読み込み、PINロック、エラーログ、初回ガイド、用語集を実装。「記録」時に v1.0 として確定予定。</td></tr></table>
+</main>
+</div>
+<script>
+try{const s=JSON.parse(localStorage.getItem('logitore.v1')||'{}').settings||{};const t=s.theme==='system'||!s.theme?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):s.theme;document.documentElement.dataset.theme=s.theme?t:'dark';if(s.accent)document.documentElement.style.setProperty('--ac',s.accent);if(s.font)document.documentElement.style.fontSize=(s.font*100)+'%'}catch(e){}
+const toc=document.getElementById('toc'),tog=document.getElementById('tog');
+const small=()=>innerWidth<=760;
+if(small())toc.classList.add('min');
+const upd=()=>tog.setAttribute('aria-expanded',!toc.classList.contains('min'));upd();
+tog.onclick=()=>{toc.classList.toggle('min');upd()};
+toc.addEventListener('click',e=>{if(e.target.tagName==='A'&&small()){toc.classList.add('min');upd()}});
+const links=[...toc.querySelectorAll('a')];const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+en.target.id))}})},{rootMargin:'-20% 0px -70% 0px'});secs.forEach(s=>s&&io.observe(s));
+</script>
+</body>
+</html>

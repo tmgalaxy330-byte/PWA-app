@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#0E0E0D">
+<meta name="description" content="ロジカルシンキングの思考ノートとドリル">
+<title>ロジトレ</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<!-- ロジトレ 試作版(検討中・ver未確定) -->
+<style>
+:root{--ac:#378ADD;--kb:0px;--r:8px;--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;--ease:cubic-bezier(.2,.7,.2,1);--spring:cubic-bezier(.34,1.4,.64,1)}
+[data-theme=light]{--bg:#FAFAF9;--bg2:#FFFFFF;--bg3:#F1F0EC;--tx:#111110;--sub:#6B6A65;--ln:#E6E5E1;--ln2:#D3D1C7;--inv:#FFFFFF;--dg:#C73B3A;--scrim:rgba(0,0,0,.35);color-scheme:light}
+[data-theme=dark]{--bg:#0E0E0D;--bg2:#171716;--bg3:#1F1F1D;--tx:#EDEDEA;--sub:#8F8E88;--ln:#262624;--ln2:#3A3A36;--inv:#0E0E0D;--dg:#E5534B;--scrim:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",sans-serif;font-feature-settings:"palt";overscroll-behavior-y:contain}
+body{min-height:100dvh;line-height:1.6}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+.mono{font-family:var(--mono);letter-spacing:.02em}
+.ic{width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.b{stroke-width:2.8}
+.view{display:none;max-width:760px;margin:0 auto;min-height:100dvh;padding-bottom:calc(7rem + env(safe-area-inset-bottom))}
+.view.on{display:block}
+#v-editor.view{max-width:1240px}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:.15rem;padding:calc(.5rem + env(safe-area-inset-top)) .75rem .5rem;background:var(--bg)}
+.ib{width:2.6rem;height:2.6rem;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;color:var(--tx);flex:none}
+.ib[aria-disabled=true]{opacity:.3}
+.brand{font-size:.72rem;color:var(--sub);margin-left:.4rem;flex:1}
+.ttl{font-size:1rem;font-weight:500;margin-left:.3rem;flex:1}
+.sp{flex:1}
+.hero{display:flex;align-items:baseline;gap:.6rem;padding:1.1rem 1.25rem .2rem}
+.hero h1{font-size:1.9rem;font-weight:500;margin:0;letter-spacing:-.01em}
+.cnt{font-size:.8rem;color:var(--sub)}
+.notice{display:flex;align-items:center;gap:.5rem;width:calc(100% - 2.5rem);margin:.6rem 1.25rem 0;padding:.65rem 0;border-top:.5px solid var(--ln);border-bottom:.5px solid var(--ln);font-size:.78rem;color:var(--sub);text-align:left}
+.dot{width:6px;height:6px;border-radius:50%;flex:none;display:inline-block}
+.dcard{display:block;width:calc(100% - 2.5rem);margin:0 1.25rem;padding:.9rem 0;border-bottom:.5px solid var(--ln);text-align:left}
+.dcard .r1{display:flex;align-items:baseline;font-size:.85rem}
+.dcard .r1 span:last-child{margin-left:auto;font-size:.75rem;color:var(--sub)}
+.segs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:.6rem}
+.segs i{height:3px;border-radius:2px;background:var(--ln2)}
+.segs i.ok{background:var(--ac)}.segs i.ng{background:var(--sub)}
+.tabs{display:flex;padding:.4rem 1.25rem 0;gap:1.2rem}
+.tab{padding:.5rem 0;font-size:.85rem;color:var(--sub);border-bottom:1.5px solid transparent}
+.tab.on{color:var(--tx);border-bottom-color:var(--tx)}
+.subrow{display:flex;justify-content:space-between;align-items:center;padding:.4rem 1.25rem;font-size:.72rem;color:var(--sub);border-top:.5px solid var(--ln)}
+.subrow button{display:flex;align-items:center;gap:.25rem;color:var(--sub);padding:.3rem 0}
+.subrow .ic{width:1rem;height:1rem}
+.list{padding:0 1.25rem}
+.row{position:relative;border-bottom:.5px solid var(--ln);overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sw-c{position:relative;z-index:1;display:flex;align-items:center;gap:.9rem;padding:1rem 0;background:var(--bg);width:100%;text-align:left;transition:transform .28s var(--ease)}
+.sw-a{position:absolute;top:0;bottom:0;right:0;display:flex}
+.sw-a button{width:70px;font-size:.72rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--bg3)}
+.sw-a button.del{background:var(--dg);color:#fff}
+.num{font-size:.7rem;color:var(--sub);width:1.2rem;flex:none}
+.rmain{flex:1;min-width:0}
+.rtitle{font-size:.97rem;display:flex;align-items:center;gap:.35rem}
+.rtitle .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rtitle .ic{width:.9rem;height:.9rem;color:var(--ac)}
+.meta{font-size:.68rem;color:var(--sub);display:flex;align-items:center;gap:.45rem;margin-top:.3rem;flex-wrap:wrap}
+.st{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.st.draft{border:1px solid var(--sub)}.st.wip{background:var(--ac)}.st.done{background:var(--tx)}
+.enter{opacity:0;translate:0 6px;animation:up .32s var(--ease) forwards}
+@keyframes up{to{opacity:1;translate:0 0}}
+.fab{position:fixed;right:calc(1.25rem + env(safe-area-inset-right));bottom:calc(1.25rem + env(safe-area-inset-bottom));width:3.3rem;height:3.3rem;border-radius:14px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;z-index:30;transition:transform .2s var(--spring)}
+.fab:active{transform:scale(.9)}
+.fab .ic{width:1.5rem;height:1.5rem}
+@media(min-width:800px){.fab{right:calc(50% - 380px + 1.25rem)}}
+.empty{padding:2.5rem 0}
+.empty h3{font-weight:500;font-size:1.05rem;margin:0 0 .3rem}
+.empty p{color:var(--sub);font-size:.85rem;margin:0 0 1rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.6rem;padding:0 1rem;border-radius:var(--r);border:.5px solid var(--ln2);font-size:.88rem;background:var(--bg2)}
+.btn .ic{width:1.1rem;height:1.1rem}
+.btn.pri{background:var(--tx);color:var(--inv);border-color:var(--tx)}
+.btn.ac{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn.dg{color:var(--dg);border-color:var(--dg);background:transparent}
+.btn.full{width:100%}
+.btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.srch{display:flex;gap:.4rem;align-items:center;padding:.1rem 1.25rem .5rem}
+.inp{width:100%;height:2.6rem;padding:0 .8rem;border-radius:var(--r);border:.5px solid var(--ln2);background:var(--bg2);outline:none}
+.inp:focus{border-color:var(--ac)}
+textarea.inp{height:auto;min-height:6rem;padding:.6rem .8rem;resize:vertical;line-height:1.6;display:block}
+.rp{position:relative;overflow:hidden}
+.rpl{position:absolute;border-radius:50%;background:currentColor;opacity:.14;transform:scale(0);animation:rpl .5s ease-out forwards;pointer-events:none}
+@keyframes rpl{to{transform:scale(1);opacity:0}}
+.ov{position:fixed;inset:0;z-index:100}
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;transition:opacity .25s}
+.ov.in .scrim{opacity:1}.ov.out .scrim{opacity:0}
+.sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:640px;max-height:90dvh;background:var(--bg2);border-radius:16px 16px 0 0;border-top:.5px solid var(--ln2);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s var(--spring);padding-bottom:calc(env(safe-area-inset-bottom) + var(--kb))}
+.ov.in .sheet{transform:none}
+.ov.out .sheet{transform:translateY(100%);transition:transform .22s ease-in}
+.sheet.full{height:92dvh}
+.grab{display:flex;justify-content:center;padding:.6rem 0 .35rem;cursor:grab;touch-action:none;flex:none}
+.grab span{width:2.4rem;height:4px;border-radius:2px;background:var(--ln2)}
+.sh-h{padding:.1rem 1.25rem .7rem;font-weight:500;font-size:1rem;display:flex;align-items:center;gap:.5rem;flex:none}
+.sh-b{overflow:auto;padding:0 1.25rem 1.25rem;overscroll-behavior:contain;flex:1}
+.dlg{position:absolute;left:50%;top:50%;width:min(88vw,380px);transform:translate(-50%,-46%) scale(.96);opacity:0;background:var(--bg2);border:.5px solid var(--ln2);border-radius:14px;padding:1.25rem;transition:all .22s var(--ease)}
+.ov.in .dlg{opacity:1;transform:translate(-50%,-50%)}.ov.out .dlg{opacity:0}
+.dlg h3{margin:0 0 .4rem;font-size:1.02rem;font-weight:500}
+.dlg p{margin:0 0 1.1rem;color:var(--sub);font-size:.88rem;white-space:pre-wrap}
+.acts{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap}
+.drawer{position:absolute;top:0;bottom:0;left:0;width:min(82vw,300px);background:var(--bg2);border-right:.5px solid var(--ln2);transform:translateX(-100%);transition:transform .38s var(--spring);padding:calc(1rem + env(safe-area-inset-top)) .75rem 1rem;display:flex;flex-direction:column;gap:.1rem}
+.ov.in .drawer{transform:none}.ov.out .drawer{transform:translateX(-100%);transition:transform .2s ease-in}
+.drawer .brand{flex:none;padding:.4rem .75rem 1rem;margin:0}
+.nav{display:flex;align-items:center;gap:.8rem;padding:.75rem;border-radius:10px;font-size:.95rem;text-align:left;width:100%}
+.nav.on{background:var(--bg3)}
+.nav .n{margin-left:auto;font-size:.72rem;color:var(--sub)}
+.menu{position:absolute;min-width:210px;background:var(--bg2);border:.5px solid var(--ln2);border-radius:12px;padding:.3rem;transform:scale(.88);opacity:0;transition:transform .22s var(--spring),opacity .15s}
+.ov.in .menu{transform:none;opacity:1}.ov.out .menu{opacity:0;transform:scale(.95)}
+.mi{display:flex;align-items:center;gap:.7rem;width:100%;padding:.65rem .75rem;border-radius:8px;font-size:.9rem;text-align:left}
+.mi .ic{width:1.1rem;height:1.1rem;color:var(--sub)}
+.mi.dg,.mi.dg .ic{color:var(--dg)}
+.mi:active{background:var(--bg3)}
+.msep{height:.5px;background:var(--ln);margin:.3rem .4rem}
+#toasts{position:fixed;left:0;right:0;bottom:calc(5.6rem + env(safe-area-inset-bottom) + var(--kb));z-index:200;display:flex;flex-direction:column;align-items:center;gap:.4rem;pointer-events:none;padding:0 1rem}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:.8rem;max-width:520px;width:100%;background:var(--tx);color:var(--inv);font-size:.82rem;padding:.7rem .9rem;border-radius:var(--r);transform:translateY(10px);opacity:0;transition:all .25s var(--ease)}
+.toast.in{transform:none;opacity:1}
+.toast button{color:var(--ac);font-weight:500;margin-left:auto;font-size:.82rem;flex:none;padding:.2rem .3rem}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:300;width:100vw;height:100vh}
+.reveal{position:fixed;inset:0;z-index:400;pointer-events:none}
+html.rm *,html.rm *::before,html.rm *::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+html.vt-theme::view-transition-old(root),html.vt-theme::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-group(*){animation-duration:.34s;animation-timing-function:cubic-bezier(.2,.7,.2,1)}
+/* editor */
+.savest{font-size:.66rem;color:var(--sub);margin-left:.2rem;white-space:nowrap}
+.savest.err{color:var(--dg)}
+.ed-head{padding:.2rem 1.25rem 0}
+.ed-title{width:100%;font-size:1.5rem;font-weight:500;border:0;background:transparent;outline:none;padding:.2rem 0;letter-spacing:-.01em}
+.ed-title::placeholder{color:var(--sub);opacity:.7}
+.ed-meta{display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--sub);padding:.2rem 0 .7rem;border-bottom:.5px solid var(--ln);flex-wrap:wrap}
+.segc{display:inline-flex;border:.5px solid var(--ln2);border-radius:8px;overflow:hidden;margin-left:auto}
+.segc button{padding:.32rem .7rem;font-size:.72rem;color:var(--sub)}
+.segc button.on{background:var(--tx);color:var(--inv)}
+.ed-wrap{display:grid;grid-template-columns:minmax(0,1fr)}
+.outline{padding:.5rem 1.25rem 1rem}
+.nd{display:flex;align-items:flex-start;gap:.2rem;padding:.12rem 0;position:relative;border-radius:8px}
+.car{width:1.4rem;height:2rem;display:flex;align-items:center;justify-content:center;color:var(--sub);flex:none;transition:transform .2s var(--ease)}
+.car .ic{width:.95rem;height:.95rem}
+.car.closed{transform:rotate(-90deg)}
+.car.none{visibility:hidden}
+.hd{width:1.5rem;height:2rem;display:flex;align-items:center;justify-content:center;color:var(--sub);flex:none;touch-action:none;cursor:grab}
+.hd .ic{width:1rem;height:1rem}
+.lb{font-family:var(--mono);font-size:.6rem;color:var(--sub);border:.5px solid var(--ln2);border-radius:4px;padding:0 .3rem;margin-top:.5rem;flex:none;white-space:nowrap;line-height:1.5}
+.lb.d0{color:var(--ac);border-color:var(--ac)}
+.tx{flex:1;min-width:0;outline:none;padding:.3rem .35rem;border-radius:6px;font-size:.95rem;line-height:1.55;word-break:break-word;min-height:2rem}
+.tx:focus{background:var(--bg3)}
+.tx:empty::before{content:attr(data-ph);color:var(--sub);opacity:.75}
+.nd.d0 .tx{font-weight:500;font-size:1.02rem}
+.nd.drag{background:var(--bg3);z-index:5;transition:none}
+.nd.hit{animation:hit .9s ease}
+@keyframes hit{0%{background:color-mix(in srgb,var(--ac) 25%,transparent)}100%{background:transparent}}
+.addrow{display:flex;align-items:center;gap:.4rem;color:var(--sub);font-size:.82rem;padding:.6rem .2rem}
+.addrow .ic{width:1rem;height:1rem}
+.nodebar{position:fixed;left:0;right:0;bottom:var(--kb);z-index:60;display:flex;background:var(--bg2);border-top:.5px solid var(--ln2);padding:.2rem .25rem calc(.2rem + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .25s var(--ease)}
+.nodebar:not(.on){visibility:hidden;transition:transform .25s var(--ease),visibility 0s .25s}
+.nodebar.on{transform:none}
+.nodebar button{flex:1;height:2.9rem;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:.56rem;color:var(--sub);gap:1px}
+.nodebar button .ic{color:var(--tx);width:1.15rem;height:1.15rem}
+.nodebar button.dgb .ic{color:var(--dg)}
+.panel{background:var(--bg2)}
+.phd{display:flex;align-items:center;gap:.3rem;padding:.2rem .75rem .2rem 1.25rem;flex:none}
+.phd .t{font-size:.72rem;color:var(--sub);flex:1}
+.pbody{padding:0 1.25rem 2rem}
+.psec{padding:.9rem 0;border-bottom:.5px solid var(--ln)}
+.pt{font-size:.68rem;color:var(--sub);font-family:var(--mono);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
+.chk{display:flex;align-items:center;gap:.6rem;padding:.35rem 0;font-size:.88rem}
+.chk input{width:1.1rem;height:1.1rem;accent-color:var(--ac);flex:none}
+.help{width:1.4rem;height:1.4rem;display:inline-flex;align-items:center;justify-content:center;color:var(--sub);vertical-align:middle}
+.help .ic{width:.95rem;height:.95rem}
+.rv{padding:.6rem 0;border-bottom:.5px solid var(--ln);font-size:.8rem;display:flex;gap:.5rem;align-items:flex-start;width:100%;text-align:left}
+.rv:last-child{border-bottom:0}
+.rv .d{font-family:var(--mono);font-size:.66rem;color:var(--sub);flex:none;margin-top:.1rem}
+.rv .x{flex:1;color:var(--sub);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+@media(min-width:900px){
+ .ed-wrap{grid-template-columns:minmax(0,1fr) 330px}
+ .ed-wrap.pcc{grid-template-columns:minmax(0,1fr)}
+ .ed-wrap.pcc .panel{display:none}
+ .panel{position:sticky;top:3.7rem;height:calc(100dvh - 3.7rem);overflow:auto;border-left:.5px solid var(--ln);background:var(--bg)}
+ .pgrab{display:none}
+}
+@media(max-width:899px){
+ .panel{position:fixed;left:0;right:0;bottom:0;z-index:70;height:52dvh;border-radius:16px 16px 0 0;border-top:.5px solid var(--ln2);transform:translateY(105%);transition:transform .4s var(--spring),height .35s var(--ease);display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+ .panel[data-s=half]{transform:none}
+ .panel[data-s=full]{transform:none;height:90dvh}
+ .panel .pbody{overflow:auto;flex:1;overscroll-behavior:contain}
+ .panel .pclose-pc{display:none}
+}
+.v-editor-focus .top>*:not(.keep){display:none}
+.v-editor-focus .ed-meta{display:none}
+.v-editor-focus .ed-wrap{grid-template-columns:minmax(0,1fr)!important}
+.v-editor-focus .panel{display:none}
+.fexit{display:none}
+.v-editor-focus .fexit{display:inline-flex;margin-left:auto}
+.treewrap{overflow:auto;padding:1rem 1.25rem 3rem}
+.zoom{display:flex;gap:.2rem;align-items:center;padding:.5rem 1.25rem 0;font-size:.7rem;color:var(--sub)}
+.zoom .ib{width:2.2rem;height:2.2rem}
+.tvroot{transform-origin:0 0;display:inline-block;transition:transform .2s var(--ease)}
+.tn{display:flex;align-items:center}
+.tbx{border:.5px solid var(--ln2);background:var(--bg2);border-radius:6px;padding:.35rem .6rem;font-size:.8rem;max-width:13rem;min-width:4.5rem;text-align:left;line-height:1.45;flex:none}
+.tbx .tl{display:block;font-family:var(--mono);font-size:.56rem;color:var(--sub)}
+.tbx.d0{border-color:var(--ac)}
+.tbx .more{font-family:var(--mono);font-size:.6rem;color:var(--ac);margin-left:.3rem}
+.tbx .emp{color:var(--sub)}
+.tk{display:flex;flex-direction:column;padding-left:1.2rem;position:relative}
+.tk::before{content:'';position:absolute;left:0;top:50%;width:1.2rem;border-top:1px solid var(--ln2)}
+.tk>.tn{position:relative;padding:.22rem 0 .22rem .7rem}
+.tk>.tn::before{content:'';position:absolute;left:0;top:50%;width:.7rem;border-top:1px solid var(--ln2)}
+.tk>.tn::after{content:'';position:absolute;left:0;top:0;bottom:0;border-left:1px solid var(--ln2)}
+.tk>.tn:first-child::after{top:50%}
+.tk>.tn:last-child::after{bottom:50%}
+.tk>.tn:only-child::after{display:none}
+pre.md{white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:.7rem;background:var(--bg3);border-radius:8px;padding:.8rem;max-height:13rem;overflow:auto;margin:.6rem 0;line-height:1.6}
+.lbl{font-size:.72rem;color:var(--sub);margin:.9rem 0 .4rem;display:block}
+/* settings */
+.sec{padding:0 1.25rem}
+.sec h2{font-size:.66rem;font-family:var(--mono);color:var(--sub);font-weight:400;margin:1.5rem 0 .1rem;letter-spacing:.08em}
+.srow{display:flex;align-items:center;gap:.8rem;padding:.8rem 0;border-bottom:.5px solid var(--ln);width:100%;text-align:left;font-size:.92rem;min-height:3.2rem}
+.srow .sl{flex:1;min-width:0}
+.srow small{display:block;color:var(--sub);font-size:.72rem;line-height:1.5}
+.srow .sv{margin-left:auto;color:var(--sub);font-size:.78rem;display:flex;align-items:center;gap:.2rem;flex:none}
+.srow .sv .ic{width:1rem;height:1rem}
+.srow.dgr{color:var(--dg)}
+.tg{width:2.7rem;height:1.55rem;border-radius:1rem;background:var(--ln2);position:relative;flex:none;transition:background .2s}
+.tg::after{content:'';position:absolute;top:.17rem;left:.17rem;width:1.2rem;height:1.2rem;border-radius:50%;background:#fff;transition:transform .28s var(--spring)}
+.tg.on{background:var(--ac)}.tg.on::after{transform:translateX(1.15rem)}
+.seg{display:inline-flex;border:.5px solid var(--ln2);border-radius:8px;overflow:hidden;flex:none}
+.seg button{padding:.35rem .6rem;font-size:.74rem;color:var(--sub)}
+.seg button.on{background:var(--tx);color:var(--inv)}
+.sws{display:flex;gap:.5rem;flex:none}
+.swc{width:1.7rem;height:1.7rem;border-radius:6px;border:2px solid var(--bg);box-shadow:0 0 0 1px var(--ln2)}
+.swc.on{box-shadow:0 0 0 2px var(--tx)}
+/* drill */
+.dq{padding:.6rem 1.25rem}
+.qn{font-size:.72rem;color:var(--sub);display:flex;gap:.6rem;align-items:center}
+.qt{font-size:1.02rem;margin:.7rem 0 1.1rem;line-height:1.75;white-space:pre-wrap}
+.ch{display:flex;gap:.7rem;align-items:flex-start;width:100%;text-align:left;padding:.85rem .9rem;border:.5px solid var(--ln2);border-radius:10px;margin-bottom:.5rem;font-size:.9rem;background:var(--bg2);transition:border-color .2s,background .2s}
+.ch .k{font-family:var(--mono);font-size:.72rem;color:var(--sub);margin-top:.12rem;flex:none}
+.ch.ok{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,var(--bg2))}
+.ch.ng{border-color:var(--dg);background:color-mix(in srgb,var(--dg) 10%,var(--bg2))}
+.ch.dim{opacity:.55}
+.exp{border-left:2px solid var(--ac);padding:.2rem 0 .2rem .8rem;margin:1rem 0;font-size:.86rem;color:var(--sub);white-space:pre-wrap}
+.exp b{color:var(--tx);font-weight:500;display:block;margin-bottom:.2rem}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin:.8rem 0}
+.stat{background:var(--bg3);border-radius:8px;padding:.7rem}
+.stat b{display:block;font-weight:500;font-size:1.2rem;font-family:var(--mono)}
+.stat span{font-size:.68rem;color:var(--sub)}
+.bars{display:flex;align-items:flex-end;gap:4px;height:5rem;margin-top:.6rem;border-bottom:.5px solid var(--ln2)}
+.bars div{flex:1;background:var(--ac);border-radius:2px 2px 0 0;min-height:2px}
+.bars div.z{background:var(--ln2)}
+.blab{display:flex;gap:4px;font-size:.55rem;color:var(--sub);font-family:var(--mono);margin-top:.2rem}
+.blab span{flex:1;text-align:center}
+/* full overlays */
+.full-ov{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;flex-direction:column;transition:opacity .25s}
+.slides{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;padding:4rem 2rem 2rem;display:flex;flex-direction:column;justify-content:center;max-width:100vw}
+.slide .k{font-family:var(--mono);font-size:.75rem;color:var(--ac);margin-bottom:1rem}
+.slide h2{font-size:1.6rem;font-weight:500;margin:0 0 .8rem;line-height:1.45}
+.slide p{color:var(--sub);margin:0;line-height:1.8}
+.dots{display:flex;gap:6px;justify-content:center;padding:1rem}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--ln2);transition:width .25s var(--ease),background .25s}
+.dots i.on{width:18px;background:var(--tx)}
+.obnav{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom))}
+.pinv{align-items:center;justify-content:center;gap:1.4rem}
+.pinv h2{font-weight:500;font-size:1.1rem;margin:0}
+.pdots{display:flex;gap:.9rem}
+.pdots i{width:.8rem;height:.8rem;border-radius:50%;border:1px solid var(--tx)}
+.pdots i.f{background:var(--tx)}
+.kp{display:grid;grid-template-columns:repeat(3,4.3rem);gap:.9rem}
+.kp button{height:4.3rem;border-radius:50%;font-size:1.4rem;font-family:var(--mono);background:var(--bg3)}
+.kp button.bl{visibility:hidden}
+.kp button.fn{background:transparent;font-size:.8rem;font-family:inherit}
+.gl dt{font-weight:500;margin-top:1rem;font-size:.95rem}
+.gl dd{margin:.3rem 0 0;color:var(--sub);font-size:.86rem;line-height:1.7}
+.tpl{display:flex;gap:1rem;align-items:center;width:100%;text-align:left;padding:.9rem 0;border-bottom:.5px solid var(--ln)}
+.tpl .c{font-family:var(--mono);font-size:.62rem;color:var(--ac);width:5.2rem;flex:none}
+.tpl b{font-weight:500;font-size:.95rem;display:block}
+.tpl small{color:var(--sub);font-size:.76rem}
+.iss{padding:.55rem 0;border-bottom:.5px solid var(--ln);font-size:.86rem;display:flex;gap:.5rem;align-items:flex-start}
+.iss .ic{width:1rem;height:1rem;margin-top:.2rem;color:var(--dg)}
+.iss.ok .ic{color:var(--ac)}
+.er{padding:.7rem 0;border-bottom:.5px solid var(--ln);font-size:.8rem}
+.er .d{font-family:var(--mono);font-size:.66rem;color:var(--sub)}
+.er .m{margin:.2rem 0;word-break:break-all}
+.er .s{font-family:var(--mono);font-size:.62rem;color:var(--sub);word-break:break-all}
+.tplr{display:flex;align-items:center;border-bottom:.5px solid var(--ln)}
+.tplr .tpl{border-bottom:0;flex:1;min-width:0}
+.tinfo{color:var(--sub)}
+.us h4{font-size:.7rem;font-family:var(--mono);color:var(--sub);font-weight:400;margin:1rem 0 .3rem;letter-spacing:.04em}
+.us p,.us li{font-size:.88rem;line-height:1.75;margin:0}
+.us ol,.us ul{margin:0;padding-left:1.3rem}
+.us .ex{background:var(--bg3);border-radius:8px;padding:.6rem .8rem;font-size:.82rem}
+.sp-tag{display:inline-block;font-size:.62rem;color:var(--ac);border:.5px solid var(--ac);border-radius:4px;padding:0 .4rem}
+.sv-r{display:flex;gap:.4rem;align-items:flex-start;padding-top:.25rem;padding-bottom:.25rem}
+.sv-r .lb{margin-top:.25rem}
+.sv-t{font-size:.86rem;line-height:1.6}.sv-t.b{font-weight:500}
+.dres{border:.5px solid var(--ac);border-radius:10px;padding:1rem;margin:.5rem 0 1rem}
+.dres .c{font-size:.62rem;color:var(--ac);display:block}
+.dres b{font-weight:500;font-size:1.15rem;display:block;margin:.2rem 0 .4rem}
+.dres p{margin:0;font-size:.86rem;color:var(--sub);line-height:1.7}
+iframe.man{width:100%;height:100%;border:0;display:block;background:var(--bg)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div id="app">
+ <section id="v-home" class="view" aria-label="ホーム"></section>
+ <section id="v-editor" class="view" aria-label="作業画面"></section>
+ <section id="v-drill" class="view" aria-label="ドリル"></section>
+ <section id="v-trash" class="view" aria-label="ゴミ箱"></section>
+ <section id="v-settings" class="view" aria-label="設定"></section>
+</div>
+<div id="nodebar" class="nodebar" role="toolbar" aria-label="項目の操作"></div>
+<div id="layer"></div>
+<div id="toasts" aria-live="polite"></div>
+<canvas id="fx"></canvas>
+<input type="file" id="file" accept="application/json,.json" class="vh" tabindex="-1">
+<script>
+'use strict';
+/* ===== 基本情報 ===== */
+const APP={name:'ロジトレ',version:'検討中(ver未確定)',build:'trial-2',key:'logitore.v1'};
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const dk=(off=0)=>{const d=new Date();d.setDate(d.getDate()+off);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const pad2=n=>String(n).padStart(2,'0');
+function rel(t){const s=(Date.now()-t)/1000;if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return Math.floor(s/604800)+'w'}
+function fdate(t){const d=new Date(t);return d.getFullYear()+'/'+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())}
+const coarse=matchMedia('(pointer:coarse)').matches;
+const wide=()=>innerWidth>=900;
+
+/* ===== アイコン ===== */
+const ICONS={menu:'M4 7h16M4 12h16M4 17h16',search:'M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM20 20l-5.6-5.6',sun:'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4',moon:'M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9z',plus:'M12 5v14M5 12h14',chevr:'M9 6l6 6-6 6',chevl:'M15 6l-6 6 6 6',chevd:'M6 9l6 6 6-6',pin:'M15 4.5l-4 4-4 1.5-1.5 1.5 7 7 1.5-1.5 1.5-4 4-4M9 15l-4.5 4.5M14.5 4l5.5 5.5',dots:'M12 5h.01M12 12h.01M12 19h.01',undo:'M9 14l-4-4 4-4M5 10h11a4 4 0 0 1 0 8h-1',redo:'M15 14l4-4-4-4M19 10H8a4 4 0 0 0 0 8h1',panel:'M4 5h16v14H4zM15 5v14',tree:'M4 5h6v4H4zM14 15h6v4h-6zM14 9h6v4h-6zM7 9v8h7M7 11h7',x:'M6 6l12 12M18 6L6 18',trash:'M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3',copy:'M8 8h12v12H8zM16 8V4H4v12h4',check:'M5 12l5 5L20 7',alert:'M12 8v4M12 16h.01M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z',download:'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M7 11l5 5 5-5M12 4v12',upload:'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M7 9l5-5 5 5M12 4v12',share:'M6 10a2 2 0 1 1 0 4a2 2 0 1 1 0-4zM18 4a2 2 0 1 1 0 4a2 2 0 1 1 0-4zM18 16a2 2 0 1 1 0 4a2 2 0 1 1 0-4zM7.8 11.1l8.4-4.2M7.8 12.9l8.4 4.2',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z',focus:'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',up:'M12 19V5M6 11l6-6 6 6',down:'M12 5v14M6 13l6 6 6-6',indent:'M4 6h16M11 12h9M4 18h16M4 10l3 2-3 2',outdent:'M4 6h16M11 12h9M4 18h16M7 10l-3 2 3 2',grip:'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',sort:'M4 7h10M4 12h7M4 17h4M17 5v14M14 16l3 3 3-3',help:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.6M12 17h.01',target:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 12h.01',home:'M4 11l8-7 8 7M6 9.5V20h12V9.5',sliders:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',book:'M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM5 18a2 2 0 0 1 2-2h12M9 8h6',lock:'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',image:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01',list:'M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6',enter:'M19 6v5a3 3 0 0 1-3 3H6M10 10l-4 4 4 4',child:'M6 4v10a3 3 0 0 0 3 3h9M14 13l4 4-4 4',flag:'M5 21V4h11l-2 4 2 4H5',info:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 11v5M12 8h.01'};
+const BOLD=new Set(['dots','grip']);
+function I(n){return `<svg class="ic${BOLD.has(n)?' b':''}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[n]||''}"/></svg>`}
+
+/* ===== 保存 ===== */
+let S=null; const pendingErr=[];
+function defState(){return{schema:1,thoughts:[],trash:[],settings:{theme:'dark',accent:'#378ADD',font:1,reduceMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,backConfirm:true,pinOn:false,pin:null,backupDays:7,pcPanel:true},drill:{days:{},streak:0,lastDone:null,total:0,correct:0,today:null},errors:[],meta:{created:Date.now(),lastExport:null,firstThoughtAt:null,onboarded:false,last:null}}}
+function migrate(s){const d=defState();if(!s||typeof s!=='object')return d;const fixT=t=>{if(t&&t.template==='tree')t.template='why';if(t&&!TPL[t.template])t.template='blank'};(s.thoughts||[]).forEach(fixT);(s.trash||[]).forEach(fixT);for(const k of Object.keys(d)){if(s[k]===undefined)s[k]=d[k];else if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k])){for(const kk of Object.keys(d[k]))if(s[k][kk]===undefined)s[k][kk]=d[k][kk]}}return s}
+const Store={ok:true,
+ load(){let raw=null;try{raw=localStorage.getItem(APP.key)}catch(e){this.ok=false;pendingErr.push(e)}
+  try{S=migrate(raw?JSON.parse(raw):null)}catch(e){pendingErr.push(new Error('保存データの読み込みに失敗: '+e.message));S=defState()}},
+ save(){try{localStorage.setItem(APP.key,JSON.stringify(S));this.ok=true;return true}catch(e){this.ok=false;try{S.errors.unshift({t:Date.now(),msg:'保存に失敗しました: '+(e.message||e),ctx:'save',stack:'',seen:false});S.errors=S.errors.slice(0,50)}catch(_){}return false}}};
+let saveT=null;
+function dirty(){setSaveState('saving');clearTimeout(saveT);saveT=setTimeout(flush,700)}
+function flush(){clearTimeout(saveT);saveT=null;if(!S)return;const ok=Store.save();setSaveState(ok?'saved':'error');if(!ok)toast('保存できませんでした。書き出しでバックアップしてください')}
+function setSaveState(s){const el=$('#savest');if(!el)return;el.classList.toggle('err',s==='error');el.textContent=s==='saving'?'保存中…':s==='error'?'保存失敗':'✓ 保存済み'}
+
+/* ===== エラーログ ===== */
+let errBusy=false;
+function logError(err,ctx){try{const e={t:Date.now(),msg:String((err&&err.message)||err||'不明なエラー'),ctx:ctx||'',stack:String((err&&err.stack)||'').split('\n').slice(0,4).join(' | '),seen:false};if(!S){pendingErr.push(err);return}S.errors.unshift(e);S.errors=S.errors.slice(0,50);if(!errBusy){errBusy=true;Store.save();errBusy=false}toast('エラーが発生しました(ログに保存しました)')}catch(_){}}
+addEventListener('error',e=>logError(e.error||e.message,'画面'));
+addEventListener('unhandledrejection',e=>logError(e.reason,'非同期処理'));
+
+/* ===== 演出 ===== */
+document.addEventListener('pointerdown',e=>{const el=e.target.closest('.rp');if(!el||S&&S.settings.reduceMotion)return;const r=el.getBoundingClientRect();const d=Math.max(r.width,r.height)*2;const s=document.createElement('span');s.className='rpl';s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;el.appendChild(s);s.addEventListener('animationend',()=>s.remove())},{passive:true});
+function shake(el){if(!el)return;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');try{navigator.vibrate&&navigator.vibrate(30)}catch(_){}}
+function confetti(){if(S.settings.reduceMotion)return;const c=$('#fx'),x=c.getContext('2d'),dpr=devicePixelRatio||1;c.width=innerWidth*dpr;c.height=innerHeight*dpr;x.scale(dpr,dpr);const cs=getComputedStyle(document.documentElement);const cols=[cs.getPropertyValue('--ac').trim()||'#378ADD',cs.getPropertyValue('--tx').trim(),cs.getPropertyValue('--sub').trim()];const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*80,y:innerHeight*.35,vx:(Math.random()-.5)*11,vy:-Math.random()*11-4,r:Math.random()*Math.PI,vr:(Math.random()-.5)*.35,w:5+Math.random()*5,h:3+Math.random()*4,c:cols[Math.floor(Math.random()*3)]}));const t0=performance.now();(function f(t){const k=t-t0;x.clearRect(0,0,innerWidth,innerHeight);for(const p of P){p.vy+=.32;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-k/1700);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()}if(k<1700)requestAnimationFrame(f);else x.clearRect(0,0,innerWidth,innerHeight)})(t0)}
+
+/* ===== トースト ===== */
+function toast(msg,o={}){const box=$('#toasts');if(!box)return;const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.innerHTML=`<span>${esc(msg)}</span>`+(o.action?`<button>${esc(o.action.label)}</button>`:'');box.appendChild(t);while(box.children.length>2)box.firstChild.remove();requestAnimationFrame(()=>t.classList.add('in'));const kill=()=>{t.classList.remove('in');setTimeout(()=>t.remove(),260)};if(o.action)t.querySelector('button').onclick=()=>{kill();o.action.fn()};const ms=o.ms===undefined?(o.action?4500:2200):o.ms;if(ms)setTimeout(kill,ms);return kill}
+
+/* ===== 戻る操作(CloseWatcher+履歴) ===== */
+const Back={stack:[],hasCW:typeof window.CloseWatcher==='function',ignore:0,
+ open(onClose){const h={onClose,closed:false,w:null,hist:false};if(this.hasCW){try{h.w=new CloseWatcher();h.w.onclose=()=>{if(h.closed)return;h.closed=true;this.remove(h);onClose()}}catch(e){h.w=null}}if(!h.w){history.pushState({ov:1},'');h.hist=true}this.stack.push(h);return h},
+ remove(h){const i=this.stack.indexOf(h);if(i>=0)this.stack.splice(i,1)},
+ close(h){if(!h||h.closed)return;h.closed=true;this.remove(h);if(h.w){try{h.w.destroy()}catch(_){}}else if(h.hist){this.ignore++;history.back()}}};
+const Nav={view:null,vw:null,armed:false,at:null,rt:null,mode:(typeof window.CloseWatcher==='function'&&coarse)?'cw':'hist',
+ setup(){if(this.mode!=='cw')return;if(this.vw){const w=this.vw;this.vw=null;try{w.destroy()}catch(_){}}
+  if(this.view==='home'&&!S.settings.backConfirm)return;
+  try{const w=new CloseWatcher();this.vw=w;
+   w.oncancel=e=>{if(!e.cancelable)return;if(this.view==='home'){e.preventDefault();this.exitHint(w)}else if(this.view==='editor'&&S.settings.backConfirm&&!this.armed){e.preventDefault();this.arm()}};
+   w.onclose=()=>{if(this.vw===w)this.vw=null;if(this.view==='home'){this.exitHint(null)}else{this.armed=false;go('home')}};
+  }catch(e){this.vw=null}},
+ arm(){this.armed=true;this.ak=toast('もう一度「戻る」でホームへ戻ります',{ms:3000});clearTimeout(this.at);this.at=setTimeout(()=>this.armed=false,3000)},
+ exitHint(w){toast('もう一度「戻る」で終了します',{ms:3000});if(w){if(this.vw===w)this.vw=null;setTimeout(()=>{try{w.destroy()}catch(_){}},0)}clearTimeout(this.rt);this.rt=setTimeout(()=>{if(this.view==='home'&&!this.vw)this.setup()},3200)},
+ after(prev,v,o){if(this.mode==='cw'){this.setup();return}
+  if(prev===null)return;
+  if(prev==='home'&&v!=='home')history.pushState({v},'');
+  else if(prev!=='home'&&v==='home'&&!o.pop){Back.ignore++;history.back()}
+  else if(prev!=='home'&&v!=='home')history.replaceState({v},'')}};
+addEventListener('popstate',()=>{if(Back.ignore>0){Back.ignore--;return}
+ if(!Back.hasCW){const top=Back.stack.pop();if(top){top.closed=true;top.onClose();return}}
+ if(Back.hasCW&&Back.stack.length){closeTopOverlays()}
+ if(Nav.mode==='hist'&&Nav.view!=='home'){if(Nav.view==='editor'&&S.settings.backConfirm&&coarse&&!Nav.armed){Nav.arm();history.pushState({v:Nav.view},'');return}Nav.armed=false;go('home',{pop:true})}});
+function closeTopOverlays(){[...Back.stack].reverse().forEach(h=>{if(h.closeUI)h.closeUI()})}
+
+/* ===== オーバーレイ部品 ===== */
+function overlay(inner,cls){const w=document.createElement('div');w.className='ov '+(cls||'');w.innerHTML='<div class="scrim"></div>'+inner;$('#layer').appendChild(w);requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('in')));return w}
+function sheet(html,o={}){const w=overlay(`<div class="sheet ${o.full?'full':''}" role="dialog" aria-modal="true" aria-label="${esc(o.title||'シート')}"><div class="grab"><span></span></div>${o.title?`<div class="sh-h">${o.titleHtml||esc(o.title)}</div>`:''}<div class="sh-b">${html}</div></div>`);
+ let closed=false;const api={el:w,body:$('.sh-b',w),close};
+ function close(){if(closed)return;closed=true;Back.close(h);w.classList.remove('in');w.classList.add('out');setTimeout(()=>w.remove(),S.settings.reduceMotion?0:260);o.onClose&&o.onClose()}
+ const h=Back.open(close);h.closeUI=close;$('.scrim',w).onclick=close;dragDismiss($('.sheet',w),$('.grab',w),close);return api}
+function dragDismiss(sh,grab,close){let y0=null,dy=0;grab.addEventListener('pointerdown',e=>{y0=e.clientY;dy=0;sh.style.transition='none';grab.setPointerCapture(e.pointerId)});grab.addEventListener('pointermove',e=>{if(y0===null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`});const end=()=>{if(y0===null)return;y0=null;sh.style.transition='';sh.style.transform='';if(dy>90)close()};grab.addEventListener('pointerup',end);grab.addEventListener('pointercancel',end)}
+function dialog(title,msg,buttons){return new Promise(res=>{const w=overlay(`<div class="dlg" role="alertdialog" aria-modal="true"><h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="acts">${buttons.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div>`);let done=false;const fin=v=>{if(done)return;done=true;Back.close(h);w.classList.remove('in');w.classList.add('out');setTimeout(()=>w.remove(),200);res(v)};const h=Back.open(()=>fin(null));h.closeUI=()=>fin(null);$('.scrim',w).onclick=()=>fin(null);$$('.acts button',w).forEach(b=>b.onclick=()=>fin(buttons[+b.dataset.i].v));const f=$('.acts button:last-child',w);f&&f.focus({preventScroll:true})})}
+function menu(x,y,items){const w=overlay(`<div class="menu" role="menu">${items.map((it,i)=>it==='-'?'<div class="msep"></div>':`<button class="mi ${it.dg?'dg':''}" role="menuitem" data-i="${i}">${I(it.icon||'dots')}${esc(it.label)}</button>`).join('')}</div>`);const m=$('.menu',w);const r=m.getBoundingClientRect();const mx=Math.min(Math.max(8,x),innerWidth-r.width-8),my=Math.min(Math.max(8,y),innerHeight-r.height-8);m.style.left=mx+'px';m.style.top=my+'px';m.style.transformOrigin=`${x-mx}px ${y-my}px`;let done=false;const close=()=>{if(done)return;done=true;Back.close(h);w.classList.remove('in');w.classList.add('out');setTimeout(()=>w.remove(),180)};const h=Back.open(close);h.closeUI=close;$('.scrim',w).onclick=close;$$('.mi',w).forEach(b=>b.onclick=()=>{close();const it=items[+b.dataset.i];setTimeout(()=>it.fn(),10)})}
+
+/* ===== テーマ ===== */
+function resolved(){const t=S.settings.theme;return t==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t}
+function applyTheme(){const r=document.documentElement;const th=resolved();r.dataset.theme=th;r.style.setProperty('--ac',S.settings.accent);r.style.fontSize=(S.settings.font*100)+'%';r.classList.toggle('rm',!!S.settings.reduceMotion);const m=$('meta[name=theme-color]');if(m)m.content=th==='dark'?'#0E0E0D':'#FAFAF9'}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(S&&S.settings.theme==='system')applyTheme()});
+function setTheme(next,x,y){const before=resolved();S.settings.theme=next;dirty();const after=resolved();if(before===after||S.settings.reduceMotion||!document.startViewTransition){applyTheme();rerender();return}
+ x=x??innerWidth-40;y=y??30;const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));const html=document.documentElement;html.classList.add('vt-theme');
+ const tr=document.startViewTransition(()=>{applyTheme();rerender()});tr.ready.then(()=>{html.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:480,easing:'cubic-bezier(.4,0,.2,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{});tr.finished.finally(()=>html.classList.remove('vt-theme'))}
+function rerender(){if(Nav.view==='home')renderHome(false);else if(Nav.view==='settings')renderSettings();else if(Nav.view==='editor')updEditorTop()}
+
+/* ===== テンプレート・用語 ===== */
+function mk(text='',children=[],label=null,ph=null){return{id:uid(),text,children,label,ph,collapsed:false}}
+const TPL={
+ why:{name:'Whyツリー',code:'WHY',desc:'問題の原因を「なぜ?」で掘り下げる',labels:['問題','原因','深い原因'],ph:['起きている問題(例: 問い合わせが前年比30%減)','原因(例: サイトの訪問者が減っている)','さらに深い原因'],make:()=>mk('',[mk(''),mk('')])},
+ how:{name:'Howツリー',code:'HOW',desc:'目的を達成する方法を「どうやって?」で洗い出す',labels:['目的','手段','具体策'],ph:['達成したい目的(例: 残業時間を月20%削減)','手段(例: 業務そのものを減らす)','明日から動ける具体策'],make:()=>mk('',[mk(''),mk('')])},
+ pyramid:{name:'ピラミッド',code:'PYRAMID',desc:'結論 → 理由 → 根拠の順に主張を組み立てる',labels:['結論','理由','根拠'],ph:['結論(例: 顧客管理ツールを導入すべきだ)','理由(例: 対応漏れを防げる)','根拠となる事実・データ'],make:()=>mk('',[mk('',[mk('')]),mk('',[mk('')]),mk('',[mk('')])])},
+ sky:{name:'空・雨・傘',code:'SKY/RAIN',desc:'事実 → 解釈 → 行動の順に判断する',labels:['テーマ','観点','詳細'],ph:['テーマ(例: 解約率上昇への対応)','内容','詳細'],make:()=>mk('',[mk('',[],'空 事実','観察した事実(例: 解約率が3か月連続で上昇)'),mk('',[],'雨 解釈','事実から言えること(例: 競合へ乗り換えている)'),mk('',[],'傘 行動','とるべき行動(例: 解約理由を聞き取る)')])},
+ pros:{name:'メリデメ比較',code:'PROS/CONS',desc:'複数の選択肢を同じ物差しで比べる',labels:['比較テーマ','選択肢','観点','内容'],ph:['比較するテーマ(例: 新サービスの開発体制)','選択肢(例: 自社開発)','観点','内容'],child1:()=>mk('',[mk('メリット',[mk('',[],null,'良い点')]),mk('デメリット',[mk('',[],null,'悪い点')])]),make:()=>mk('',[TPL.pros.child1(),TPL.pros.child1()])},
+ blank:{name:'白紙',code:'BLANK',desc:'型を使わずに自由に書き出す',labels:['テーマ','項目','詳細'],ph:['テーマ','項目','詳細'],make:()=>mk('')}};
+const tpl=t=>TPL[t&&t.template]||TPL.blank;
+/* 使い方(各テンプレートのⓘ) */
+const USAGE={
+ why:{goal:'起きている問題の原因を、漏れなく掘り下げます。',steps:['一番上に「問題」を具体的に書く(数字があれば入れる)','「なぜ?」と考えて、原因を2〜4個に分ける','それぞれにさらに「なぜ?」を繰り返し、手を打てるレベルまで掘る'],ex:'問題「問い合わせが前年比30%減」→ 原因「サイトの訪問者が減っている」→ 深い原因「検索からの流入が40%減」',ng:['原因の欄に解決策を書いてしまう(「広告を増やすべき」は原因ではない)','同じ階層に、大きさの違う原因を並べる'],next:'一番効いていそうな原因を選び、Howツリーで対策を考えましょう。'},
+ how:{goal:'目的を達成する方法を、漏れなく洗い出します。',steps:['達成したい目的を、数字や期限つきで書く','「どうやって?」と考えて、手段を2〜4個に分ける','手段をさらに、明日から動けるレベルの具体策まで分解する'],ex:'目的「残業時間を月20%削減」→ 手段「業務を速くする」→ 具体策「見積書をテンプレート化する」',ng:['1段目からいきなり具体策を書き、視野が狭くなる','実現できるか分からない案を早い段階で消してしまう(まず出し切る)'],next:'具体策を「効果」と「手間」で比べ、優先順位をつけましょう。'},
+ pyramid:{goal:'主張を、相手が納得できる形に組み立てます。',steps:['一番上に結論を一文で書く','結論を支える理由を3つ前後挙げる','各理由の下に、事実やデータの根拠を置く'],ex:'結論「顧客管理ツールを導入すべきだ」→ 理由「対応漏れを防げる」→ 根拠「昨年度、連絡漏れのクレームが12件」',ng:['理由と根拠が混ざる(根拠は事実・数字、理由はそこから言えること)','結論がぼやけている(「検討すべき」ではなく「導入すべき」と言い切る)'],next:'「AIに提出」の「反論」で、弱いところを確かめましょう。'},
+ sky:{goal:'事実と解釈を分けて、とるべき行動を決めます。',steps:['空(事実):誰が見ても同じになる事実を書く','雨(解釈):その事実から言えることを書く','傘(行動):解釈に基づいてとる行動を書く'],ex:'空「解約率が3か月連続で上昇」→ 雨「競合へ乗り換える顧客が増えている」→ 傘「解約理由を聞き取る」',ng:['空に解釈が混ざる(「売上が悪い」は解釈、「売上が前月比10%減」は事実)','雨(解釈)を飛ばして、いきなり行動を決める'],next:'雨(解釈)が正しいかどうかを確かめる方法も、傘に加えましょう。'},
+ pros:{goal:'複数の選択肢を、同じ物差しで比べます。',steps:['一番上に比較するテーマを書く','選択肢ごとにメリット・デメリットを挙げる(「選択肢を追加」で3つ以上も可)','どの選択肢も同じ観点(費用・期間・品質など)で比べているか確認する'],ex:'テーマ「開発体制」→ 選択肢「自社開発」→ メリット「ノウハウが社内に残る」',ng:['選択肢ごとに比べている観点がバラバラ','重要度の違いを考えずに、項目の数だけで決める'],next:'決め手になる観点を1〜2個選び、判断理由をメモに残しましょう。'},
+ blank:{goal:'型に当てはめる前に、考えを自由に書き出します。',steps:['テーマを書く','思いつくことを項目として並べる','似たものをまとめ、「右へ・左へ」で階層をつける'],ex:'テーマ「来期の目標」→ 思いつくままに10個書き出し、似たものを束ねる',ng:['書き出しっぱなしで終わる'],next:'整理できたら、内容に合う型で作り直しましょう(「迷ったら診断」も使えます)。'}};
+/* サンプル(すべて架空の数値) */
+const sm=(text,children=[],label=null)=>({text,children,label});
+const SAMPLE={
+ why:{title:'新規の問い合わせ減少の原因',memo:'原因を「入口(集客)→ 途中(問い合わせ)→ 外部(競合)」の流れで分けると、漏れが出にくくなります。',root:sm('新規顧客からの問い合わせが前年比30%減',[sm('サイトへの訪問者が減っている',[sm('検索順位が下がり、検索からの流入が40%減'),sm('広告費を前年の半分に削減した')]),sm('訪問者が問い合わせまで進まない',[sm('問い合わせフォームの入力項目が15個と多い'),sm('スマホでフォームが見づらい')]),sm('見込み客が競合に流れている',[sm('競合A社が無料相談を始めた')])])},
+ how:{title:'営業部の残業削減策',memo:'手段を「減らす・速くする・分ける」で切ると、漏れなく洗い出しやすくなります。',root:sm('営業部の残業時間を月20%削減する',[sm('業務そのものを減らす',[sm('週次の定例会議を隔週にする'),sm('使われていない日報フォーマットを廃止する')]),sm('業務を速くする',[sm('見積書をテンプレート化する'),sm('顧客情報の入力をツールで自動化する')]),sm('業務の分担を見直す',[sm('資料作成を営業事務に任せる'),sm('繁忙期だけ応援要員を入れる')])])},
+ pyramid:{title:'顧客管理ツール導入の提案',memo:'想定される反論: 月額費用(1人あたり月3,000円程度)と、定着までの教育の手間。',root:sm('顧客管理ツールを導入すべきだ',[sm('顧客情報を部署内で共有できる',[sm('現在は担当者ごとのExcel管理で、引き継ぎに平均2週間かかっている')]),sm('対応漏れを防げる',[sm('昨年度、折り返し連絡の漏れによるクレームが12件あった')]),sm('営業活動を数字で分析できる',[sm('受注率の高い営業の進め方を把握できておらず、成果が個人差に頼っている')])])},
+ sky:{title:'主力商品の解約率上昇への対応',memo:'雨(解釈)はまだ仮説です。傘の聞き取りで確かめてから、次の手を決めます。',root:sm('主力商品の解約率上昇への対応',[sm('解約率が3か月連続で上昇(2.1% → 2.8% → 3.4%)。同じ時期に競合A社が20%値下げした',[],'空 事実'),sm('価格を理由に、競合へ乗り換える顧客が増えている可能性が高い',[],'雨 解釈'),sm('今月の解約者10名に理由を聞き取り、価格が主因なら継続特典を検討する',[],'傘 行動')])},
+ pros:{title:'新サービスの開発体制の比較',memo:'決め手: 半年以内に市場に出したいならスピード重視で外部委託。長期的な強みにするなら自社開発。',root:sm('新サービスの開発体制',[sm('自社開発',[sm('メリット',[sm('開発のノウハウが社内に残る'),sm('仕様変更に素早く対応できる')]),sm('デメリット',[sm('エンジニアの採用に半年以上かかる'),sm('初期の人件費が高い')])]),sm('外部委託',[sm('メリット',[sm('3か月で開発に着手できる'),sm('必要な期間だけ費用を払えばよい')]),sm('デメリット',[sm('ノウハウが社内に残りにくい'),sm('仕様変更のたびに追加費用がかかる')])])])}};
+function fromSample(n){return mk(n.text,n.children.map(fromSample),n.label)}
+const STATUS={draft:'下書き',wip:'検討中',done:'完了'};
+const GLOSS={'MECE':'Mutually Exclusive, Collectively Exhaustive の略。「漏れなく、ダブりなく」分けること。例: 顧客を「新規客」と「既存客」に分けるのはMECE。「学生」と「女性」は重なる人がいるのでダブりがある。','ロジックツリー':'問題や目的を、木の枝のように分解していく図。原因を探る(Whyツリー)、方法を探る(Howツリー)などに使う。','ピラミッド構造':'一番上に結論、その下に理由、さらに下に根拠(事実・データ)を積み上げる構造。上から読むと「結論→なぜなら」、下から読むと「だから→結論」とつながるのが理想。','So What?(だから何?)':'事実や情報から「つまり何が言えるのか」を引き出す問い。事実を並べるだけで終わらせないために使う。','Why So?(なぜそう言える?)':'結論や主張に対して「なぜそう言えるのか」と根拠を確かめる問い。So What?と対で使う。','空・雨・傘':'空(事実: 雲が出ている)→ 雨(解釈: 雨が降りそうだ)→ 傘(行動: 傘を持っていく)の順に考える型。事実と解釈を混ぜないのがコツ。','メリデメ比較':'選択肢ごとにメリット(良い点)とデメリット(悪い点)を並べ、比べやすくする型。','粒度':'同じ階層に並ぶ項目の「大きさ・細かさ」のこと。「東京」と「日本」を同じ階層に並べると粒度がそろっていない。'};
+function glossary(focus){const html=`<dl class="gl">${Object.entries(GLOSS).map(([k,v])=>`<dt id="g-${esc(k)}">${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;const s=sheet(html,{title:'用語集'});if(focus){const el=[...$$('dt',s.el)].find(d=>d.textContent.startsWith(focus));if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),80)}}
+const help=t=>`<button class="help" data-help="${esc(t)}" aria-label="${esc(t)}の説明">${I('help')}</button>`;
+document.addEventListener('click',e=>{const h=e.target.closest('[data-help]');if(h){e.preventDefault();e.stopPropagation();const k=h.dataset.help;const key=Object.keys(GLOSS).find(g=>g.startsWith(k))||k;sheet(`<p style="margin:0;line-height:1.8;color:var(--sub)">${esc(GLOSS[key]||'')}</p><div style="margin-top:1rem"><button class="btn" id="g-all">用語集をすべて見る</button></div>`,{title:key});setTimeout(()=>{const b=$('#g-all');if(b)b.onclick=()=>{closeTopOverlays();setTimeout(()=>glossary(key),280)}},0)}},true);
+
+/* ===== 思考データ操作 ===== */
+function findNode(root,id,parent=null,depth=0){if(root.id===id)return{node:root,parent,depth,idx:parent?parent.children.indexOf(root):0};for(const c of root.children){const r=findNode(c,id,root,depth+1);if(r)return r}return null}
+function walk(n,f,d=0){f(n,d);n.children.forEach(c=>walk(c,f,d+1))}
+function fullText(t){let s=t.title+' '+t.memo;walk(t.root,n=>{s+=' '+n.text});return s}
+function titleOf(t){return t.title.trim()||t.root.text.trim()||'無題の思考'}
+function isEmptyT(t){let e=!t.title.trim()&&!t.memo.trim()&&!t.reviews.length;const preset=t.template==='pros'?['メリット','デメリット']:[];walk(t.root,n=>{const x=n.text.trim();if(x&&!preset.includes(x))e=false});return e}
+function cloneNodes(n){return{...n,id:uid(),children:n.children.map(cloneNodes)}}
+function newThought(tpl,o={}){const now=Date.now();const t={id:uid(),title:o.title||'',template:tpl,status:'draft',pinned:false,created:now,updated:now,root:o.root||TPL[tpl].make(),memo:o.memo||'',mece:{a:false,b:false,c:false},reviews:[]};S.thoughts.unshift(t);S.meta.firstThoughtAt=S.meta.firstThoughtAt||now;dirty();requestPersist();return t}
+function getT(id){return S.thoughts.find(t=>t.id===id)}
+function dupThought(id){const t=getT(id);if(!t)return;const n=JSON.parse(JSON.stringify(t));n.id=uid();n.title=titleOf(t)+' のコピー';n.root=cloneNodes(n.root);n.created=n.updated=Date.now();n.pinned=false;S.thoughts.unshift(n);dirty();toast('複製しました');if(Nav.view==='home')renderHome(false)}
+function trashThought(id){const i=S.thoughts.findIndex(t=>t.id===id);if(i<0)return;const [t]=S.thoughts.splice(i,1);t.deletedAt=Date.now();S.trash.unshift(t);dirty();if(Nav.view==='editor'&&ED.id===id)go('home');else if(Nav.view==='home')renderHome(false);toast('ゴミ箱に移動しました',{action:{label:'元に戻す',fn:()=>restoreThought(id)}})}
+function restoreThought(id){const i=S.trash.findIndex(t=>t.id===id);if(i<0)return;const [t]=S.trash.splice(i,1);delete t.deletedAt;S.thoughts.push(t);dirty();if(Nav.view==='home')renderHome(false);else if(Nav.view==='trash')renderTrash();toast('元に戻しました')}
+function togglePin(id){const t=getT(id);if(!t)return;t.pinned=!t.pinned;dirty();toast(t.pinned?'ピン留めしました':'ピン留めを外しました');if(Nav.view==='home')renderHome(false)}
+function setStatus(id,s){const t=getT(id);if(!t)return;const was=t.status;t.status=s;t.updated=Date.now();dirty();if(s==='done'&&was!=='done')confetti()}
+
+/* ===== 画面遷移 ===== */
+const H={tab:'all',sort:'updated',q:'',search:false,noticeHidden:false,scroll:0};
+function go(v,o={}){const prev=Nav.view;if(prev===v&&v!=='editor'&&!o.force)return;if(Nav.ak){Nav.ak();Nav.ak=null}
+ if(prev==='home')H.scroll=scrollY;if(prev==='editor'&&v!=='editor')leaveEditor();
+ Nav.view=v;$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+ if(v==='home')renderHome(prev!=='home');else if(v==='editor'){ED.id=o.id;renderEditor()}else if(v==='drill'){o.practice?startPractice():startToday();renderDrill()}else if(v==='trash')renderTrash();else if(v==='settings')renderSettings();
+ scrollTo(0,v==='home'?H.scroll:0);S.meta.last={v,id:o.id||null};Nav.after(prev,v,o)}
+
+/* ===== ホーム ===== */
+function homeList(){let a=S.thoughts.slice();if(H.tab!=='all')a=a.filter(t=>t.status===H.tab);if(H.q){const q=H.q.toLowerCase();a=a.filter(t=>fullText(t).toLowerCase().includes(q))}const k=H.sort;a.sort((x,y)=>(y.pinned-x.pinned)||(k==='title'?titleOf(x).localeCompare(titleOf(y),'ja'):k==='created'?y.created-x.created:y.updated-x.updated));return a}
+function backupDue(){const d=S.settings.backupDays;if(!d||!S.thoughts.length)return 0;const base=S.meta.lastExport||S.meta.firstThoughtAt;if(!base)return 0;const days=Math.floor((Date.now()-base)/864e5);return days>=d?days:0}
+function unseenErr(){return S.errors.filter(e=>!e.seen).length}
+function drillToday(){const d=S.drill.today;return d&&d.date===dk()?d:null}
+function curStreak(){const d=S.drill;if(!d.lastDone)return 0;return(d.lastDone===dk()||d.lastDone===dk(-1))?d.streak:0}
+function renderHome(anim=true){const v=$('#v-home');const ne=unseenErr(),bd=backupDue();const td=drillToday();const res=td?td.res:[];
+ const notice=(!H.noticeHidden&&(ne||bd))?`<button class="notice rp" id="h-notice">${ne?`<span class="dot" style="background:var(--dg)"></span><span>エラー ${ne}件</span>`:''}${ne&&bd?'<span>·</span>':''}${bd?`<span class="dot" style="background:var(--sub)"></span><span>書き出しから ${bd}日</span>`:''}<span style="margin-left:auto;display:flex">${I('chevr')}</span></button>`:'';
+ v.innerHTML=`<header class="top"><button class="ib rp" id="h-menu" aria-label="メニュー">${I('menu')}</button><span class="brand mono">logitore</span><button class="ib rp" id="h-search" aria-label="検索">${I('search')}</button><button class="ib rp" id="h-theme" aria-label="テーマ切替">${I(resolved()==='dark'?'sun':'moon')}</button></header>
+ ${H.search?`<div class="srch"><input class="inp" id="h-q" type="search" placeholder="タイトル・本文・メモから検索" value="${esc(H.q)}" enterkeyhint="search"><button class="ib rp" id="h-qx" aria-label="検索を閉じる">${I('x')}</button></div>`:''}
+ <div class="hero"><h1>思考</h1><span class="cnt mono" id="h-cnt"></span></div>${notice}
+ <button class="dcard rp" id="h-drill"><div class="r1"><span>今日のドリル</span><span class="mono">streak <span style="color:var(--ac)">${curStreak()}</span>d</span></div><div class="segs">${[0,1,2,3,4].map(i=>`<i class="${i<res.length?(res[i]?'ok':'ng'):''}"></i>`).join('')}</div></button>
+ <div class="tabs" role="tablist">${[['all','すべて'],['draft','下書き'],['wip','検討中'],['done','完了']].map(([k,l])=>`<button class="tab ${H.tab===k?'on':''}" role="tab" data-tab="${k}">${l}</button>`).join('')}</div>
+ <div class="subrow"><span>${H.q?'検索結果':'ピン留め・最近の思考'}</span><button id="h-sort">${I('sort')}<span>${{updated:'更新日順',created:'作成日順',title:'タイトル順'}[H.sort]}</span></button></div>
+ <div class="list" id="h-list"></div>
+ <button class="fab" id="h-fab" aria-label="新規作成">${I('plus')}</button>`;
+ drawList(anim);
+ $('#h-menu').onclick=openDrawer;$('#h-theme').onclick=e=>setTheme(resolved()==='dark'?'light':'dark',e.clientX,e.clientY);
+ $('#h-search').onclick=()=>{H.search=!H.search;if(!H.search)H.q='';renderHome(false);const q=$('#h-q');q&&q.focus()};
+ const q=$('#h-q');if(q){q.oninput=()=>{H.q=q.value;drawList(false)};$('#h-qx').onclick=()=>{H.search=false;H.q='';renderHome(false)}}
+ $$('.tab',v).forEach(b=>b.onclick=()=>{H.tab=b.dataset.tab;$$('.tab',v).forEach(x=>x.classList.toggle('on',x===b));drawList(true)});
+ $('#h-sort').onclick=e=>menu(e.clientX-180,e.clientY+10,[['updated','更新日順'],['created','作成日順'],['title','タイトル順']].map(([k,l])=>({label:(H.sort===k?'✓ ':'')+l,icon:'sort',fn:()=>{H.sort=k;renderHome(false)}})));
+ $('#h-drill').onclick=()=>go('drill');$('#h-fab').onclick=openTemplates;const n=$('#h-notice');if(n)n.onclick=openNotice;
+ bindList($('#h-list'))}
+function drawList(anim){const L=$('#h-list');if(!L)return;const a=homeList();$('#h-cnt').textContent=pad2(a.length);
+ if(!a.length){L.innerHTML=S.thoughts.length?`<div class="empty"><p>該当する思考はありません。</p></div>`:`<div class="empty"><h3>最初の思考を作りましょう</h3><p>悩みや課題をひとつ選んで、型に沿って分解していきます。</p><button class="btn ac" id="h-first">${I('plus')}新規作成</button></div>`;const f=$('#h-first');if(f)f.onclick=openTemplates;return}
+ L.innerHTML=a.map((t,i)=>`<div class="row" data-id="${t.id}"><div class="sw-a"><button class="dup" data-act="dup">${I('copy')}複製</button><button class="del" data-act="del">${I('trash')}削除</button></div><div class="sw-c rp${anim?' enter':''}" style="${anim?`animation-delay:${Math.min(i,12)*45}ms`:''}"><span class="num mono">${pad2(i+1)}</span><div class="rmain"><div class="rtitle"><span class="t">${esc(titleOf(t))}</span>${t.pinned?I('pin'):''}</div><div class="meta mono"><span class="st ${t.status}"></span>${STATUS[t.status]}<span>·</span>${tpl(t).code}<span>·</span>${rel(t.updated)}</div></div><span style="color:var(--sub);display:flex">${I('chevr')}</span></div></div>`).join('')}
+let lastGesture=null;
+function bindList(L){if(!L)return;let st=null;const OPEN=-140;
+ const closeOthers=keep=>$$('.row.open',L).forEach(r=>{if(r!==keep){r.classList.remove('open');$('.sw-c',r).style.transform=''}});
+ L.addEventListener('contextmenu',e=>{if(e.target.closest('.row')){e.preventDefault();if(!coarse){const r=e.target.closest('.row');rowMenu(r.dataset.id,e.clientX,e.clientY)}}});
+ L.addEventListener('pointerdown',e=>{const row=e.target.closest('.row');lastGesture=null;if(!row||e.target.closest('.sw-a'))return;if(e.button&&e.button!==0)return;closeOthers(row);const c=$('.sw-c',row);st={row,c,x:e.clientX,y:e.clientY,dx:0,mode:null,base:row.classList.contains('open')?OPEN:0,edge:e.clientX<28||e.clientX>innerWidth-28};st.t=setTimeout(()=>{if(st&&!st.mode){st.mode='lp';lastGesture='lp';try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}rowMenu(row.dataset.id,st.x,st.y)}},520)});
+ L.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;if(!st.mode){if(Math.abs(dx)>9&&Math.abs(dx)>Math.abs(dy)*1.2&&!st.edge){st.mode='sw';clearTimeout(st.t);st.c.style.transition='none';try{st.c.setPointerCapture(e.pointerId)}catch(_){}}else if(Math.abs(dy)>9||Math.abs(dx)>9){st.mode='scroll';clearTimeout(st.t)}}if(st.mode==='sw'){const x=Math.min(0,Math.max(-180,st.base+dx));st.dx=x;st.c.style.transform=`translateX(${x}px)`}});
+ const end=()=>{if(!st)return;clearTimeout(st.t);if(st.mode==='sw'){lastGesture='sw';st.c.style.transition='';const open=st.dx<OPEN/2;st.row.classList.toggle('open',open);st.c.style.transform=open?`translateX(${OPEN}px)`:''}st=null};
+ L.addEventListener('pointerup',end);L.addEventListener('pointercancel',()=>{if(!st)return;clearTimeout(st.t);if(st.mode==='sw'){st.c.style.transition='';st.c.style.transform=st.row.classList.contains('open')?`translateX(${OPEN}px)`:''}st=null});
+ L.addEventListener('click',e=>{const act=e.target.closest('.sw-a button');const row=e.target.closest('.row');if(!row)return;const id=row.dataset.id;
+  if(act){row.classList.remove('open');$('.sw-c',row).style.transform='';if(act.dataset.act==='dup')dupThought(id);else trashThought(id);return}
+  if(lastGesture==='sw'||lastGesture==='lp'){lastGesture=null;return}
+  if(row.classList.contains('open')){row.classList.remove('open');$('.sw-c',row).style.transform='';return}
+  openThought(id,$('.rtitle .t',row))})}
+function rowMenu(id,x,y){const t=getT(id);if(!t)return;menu(x,y,[{label:'開く',icon:'chevr',fn:()=>openThought(id)},{label:t.pinned?'ピン留めを外す':'ピン留めする',icon:'pin',fn:()=>togglePin(id)},{label:'複製',icon:'copy',fn:()=>dupThought(id)},{label:'状態を変更',icon:'flag',fn:()=>statusSheet(id)},'-',{label:'ゴミ箱へ移動',icon:'trash',dg:true,fn:()=>trashThought(id)}])}
+function statusSheet(id){const t=getT(id);const s=sheet(Object.entries(STATUS).map(([k,l])=>`<button class="tpl rp" data-s="${k}"><span class="st ${k}"></span><b>${l}</b>${t.status===k?`<span style="margin-left:auto;color:var(--ac)">${I('check')}</span>`:''}</button>`).join(''),{title:'状態を変更'});$$('[data-s]',s.el).forEach(b=>b.onclick=()=>{setStatus(id,b.dataset.s);s.close();if(Nav.view==='home')renderHome(false)})}
+function openThought(id,src){const run=()=>go('editor',{id});if(src&&document.startViewTransition&&!S.settings.reduceMotion){src.style.viewTransitionName='vt-title';const tr=document.startViewTransition(()=>{src.style.viewTransitionName='';run();const tt=$('#ed-title');if(tt)tt.style.viewTransitionName='vt-title'});tr.finished.finally(()=>{const tt=$('#ed-title');if(tt)tt.style.viewTransitionName=''})}else run()}
+function createFrom(k,o={}){closeTopOverlays();const t=newThought(k,o);setTimeout(()=>{go('editor',{id:t.id});if(!o.root)setTimeout(()=>focusNode(t.root.id),60);else toast('見本をコピーしました。自由に書き換えてください',{ms:3000})},280)}
+function openTemplates(){const s=sheet(`<button class="btn full rp" id="t-diag" style="margin-bottom:.4rem">${I('help')}迷ったら診断</button>`+Object.entries(TPL).map(([k,t])=>`<div class="tplr"><button class="tpl rp" data-k="${k}"><span class="c">${t.code}</span><span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span></button><button class="ib rp tinfo" data-info="${k}" aria-label="${esc(t.name)}の使い方">${I('info')}</button></div>`).join(''),{title:'テンプレートを選ぶ'});
+ $$('[data-k]',s.el).forEach(b=>b.onclick=()=>createFrom(b.dataset.k));$$('[data-info]',s.el).forEach(b=>b.onclick=()=>openUsage(b.dataset.info));$('#t-diag',s.el).onclick=openDiag}
+function openUsage(k){const t=TPL[k],u=USAGE[k];const s=sheet(`<div class="mono" style="font-size:.66rem;color:var(--ac);margin-bottom:.2rem">${t.code}</div>
+ <div class="us"><h4>目的</h4><p>${esc(u.goal)}</p><h4>手順</h4><ol>${u.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><h4>記入例</h4><p class="ex">${esc(u.ex)}</p><h4>よくある失敗</h4><ul>${u.ng.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h4>次にやること</h4><p>${esc(u.next)}</p></div>
+ <div class="btns" style="margin-top:1.2rem">${SAMPLE[k]?`<button class="btn" id="u-smp">${I('book')}サンプルを見る</button>`:''}<button class="btn ac" id="u-make">${I('plus')}この型で作成</button></div>`,{title:t.name+'の使い方'});
+ const b=$('#u-smp',s.el);if(b)b.onclick=()=>openSample(k);$('#u-make',s.el).onclick=()=>createFrom(k)}
+function openSample(k){const t=TPL[k],sp=SAMPLE[k];let h='';(function w(n,d){h+=`<div class="sv-r" style="padding-left:${d*1.05}rem"><span class="lb ${d===0?'d0':''}">${esc(n.label||t.labels[Math.min(d,t.labels.length-1)])}</span><span class="sv-t ${d===0?'b':''}">${esc(n.text)}</span></div>`;n.children.forEach(c=>w(c,d+1))})(sp.root,0);
+ const s=sheet(`<div class="sp-tag mono">SAMPLE · 架空の数値です</div><div style="font-weight:500;font-size:1.05rem;margin:.5rem 0 .6rem">${esc(sp.title)}</div><div class="sv">${h}</div>${sp.memo?`<div class="exp" style="margin-top:1rem"><b>ポイント</b>${esc(sp.memo)}</div>`:''}<div class="btns" style="margin-top:1rem"><button class="btn ac" id="s-copy">${I('copy')}この見本をコピーして始める</button></div>`,{title:t.name+'のサンプル'});
+ $('#s-copy',s.el).onclick=()=>createFrom(k,{title:sp.title,memo:sp.memo,root:fromSample(sp.root)})}
+const DIAG={q1:{q:'何をしたいですか?',a:[['問題の原因を知りたい','why'],['目標の達成方法を考えたい','how'],['自分の主張を人に伝えたい','pyramid'],['状況を見て、何をするか決めたい','q2'],['複数の選択肢で迷っている','pros']]},q2:{q:'手元に、判断の材料になる事実やデータはありますか?',a:[['ある','sky'],['まだない・考えがまとまっていない','blank']]}};
+const DIAG_WHY={why:'「なぜ?」を繰り返して、原因を漏れなく掘り下げられます。',how:'「どうやって?」を繰り返して、打ち手を漏れなく洗い出せます。',pyramid:'結論・理由・根拠を積み上げ、相手が納得しやすい形にできます。',sky:'事実と解釈を分けてから行動を決めるので、思い込みで動くのを防げます。',pros:'選択肢を同じ観点で並べて、比べやすくできます。',blank:'まず自由に書き出し、整理できたら合う型で作り直しましょう。'};
+function openDiag(){const s=sheet('<div id="dg"></div>',{title:'迷ったら診断'});const box=$('#dg',s.el);
+ const ask=(key,step)=>{const q=DIAG[key];box.innerHTML=`<div class="mono" style="font-size:.66rem;color:var(--sub)">Q${step}</div><div style="font-size:1rem;margin:.3rem 0 .8rem">${esc(q.q)}</div>${q.a.map(([l,v],i)=>`<button class="ch rp" data-v="${v}"><span class="k">${'ABCDE'[i]}</span><span>${esc(l)}</span></button>`).join('')}`;$$('[data-v]',box).forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(DIAG[v])ask(v,step+1);else result(v)})};
+ const result=k=>{const t=TPL[k];box.innerHTML=`<div class="mono" style="font-size:.66rem;color:var(--sub)">RESULT</div><div class="dres"><span class="c mono">${t.code}</span><b>${esc(t.name)}</b><p>${esc(DIAG_WHY[k])}</p></div><div class="btns"><button class="btn ac" id="dg-make">${I('plus')}この型で作成</button><button class="btn" id="dg-use">${I('help')}使い方を見る</button><button class="btn" id="dg-re" style="border:0;background:transparent;color:var(--sub)">${I('refresh')}やり直す</button></div>`;$('#dg-make',box).onclick=()=>createFrom(k);$('#dg-use',box).onclick=()=>openUsage(k);$('#dg-re',box).onclick=()=>ask('q1',1)};
+ ask('q1',1)}
+function openNotice(){const ne=unseenErr(),bd=backupDue();const s=sheet(`${ne?`<div class="psec"><div class="pt">ERROR</div><p style="margin:0 0 .8rem;font-size:.88rem">前回までにエラーが ${ne}件 発生しました。</p><button class="btn" id="n-err">${I('alert')}エラーログを見る</button></div>`:''}${bd?`<div class="psec"><div class="pt">BACKUP</div><p style="margin:0 0 .8rem;font-size:.88rem">最後の書き出しから ${bd}日 経っています。端末の故障やデータ消失に備えて、書き出しておきましょう。</p><button class="btn ac" id="n-exp">${I('download')}今すぐ書き出す</button></div>`:''}<div style="padding-top:1rem"><button class="btn full" id="n-hide">今回は表示しない</button></div>`,{title:'お知らせ'});const e1=$('#n-err',s.el);if(e1)e1.onclick=()=>{s.close();setTimeout(openErrors,280)};const e2=$('#n-exp',s.el);if(e2)e2.onclick=()=>{s.close();exportData()};$('#n-hide',s.el).onclick=()=>{H.noticeHidden=true;s.close();renderHome(false)}}
+function openDrawer(){const items=[['home','home','ホーム'],['drill','target','ドリル'],['trash','trash','ゴミ箱',S.trash.length||''],['settings','sliders','設定'],['manual','book','取扱説明書'],['gloss','help','用語集']];const w=overlay(`<nav class="drawer" aria-label="メニュー"><span class="brand mono">logitore</span>${items.map(([k,ic,l,n])=>`<button class="nav rp ${Nav.view===k?'on':''}" data-k="${k}">${I(ic)}${l}${n!==undefined&&n!==''?`<span class="n mono">${n}</span>`:''}</button>`).join('')}<span class="sp"></span><span class="mono" style="font-size:.62rem;color:var(--sub);padding:.75rem">${esc(APP.version)}</span></nav>`);let done=false;const close=()=>{if(done)return;done=true;Back.close(h);w.classList.remove('in');w.classList.add('out');setTimeout(()=>w.remove(),220)};const h=Back.open(close);h.closeUI=close;$('.scrim',w).onclick=close;$$('.nav',w).forEach(b=>b.onclick=()=>{const k=b.dataset.k;close();setTimeout(()=>{if(k==='manual')openManual();else if(k==='gloss')glossary();else go(k)},180)})}
+
+/* ===== 作業画面 ===== */
+const ED={id:null,view:'outline',focusId:null,zoom:1,panel:'closed',focus:false};
+const UNDO=new Map();
+const T=()=>getT(ED.id);
+function U(){if(!UNDO.has(ED.id))UNDO.set(ED.id,{past:[],future:[]});return UNDO.get(ED.id)}
+function snap(){const u=U();u.past.push(JSON.stringify(T()));if(u.past.length>80)u.past.shift();u.future=[];updUndo()}
+function undo(){const u=U();if(!u.past.length)return toast('これ以上戻せません');u.future.push(JSON.stringify(T()));restoreSnap(u.past.pop())}
+function redo(){const u=U();if(!u.future.length)return toast('やり直す操作はありません');u.past.push(JSON.stringify(T()));restoreSnap(u.future.pop())}
+function restoreSnap(j){const t=JSON.parse(j);const i=S.thoughts.findIndex(x=>x.id===t.id);if(i<0)return;S.thoughts[i]=t;t.updated=Date.now();dirty();$('#ed-title').value=t.title;renderBody();renderPanel();updUndo()}
+function updUndo(){const u=U();const a=$('#e-undo'),b=$('#e-redo');if(a)a.setAttribute('aria-disabled',!u.past.length);if(b)b.setAttribute('aria-disabled',!u.future.length)}
+function touch(){const t=T();if(!t)return;t.updated=Date.now();dirty()}
+const labelOf=(t,n,d)=>{if(n.label)return n.label;const L=tpl(t).labels;return L[Math.min(d,L.length-1)]};
+const phOf=(t,n,d)=>{if(n.ph)return n.ph;const P=tpl(t).ph;return P[Math.min(d,P.length-1)]||'項目を入力'};
+function renderEditor(){const t=T();if(!t){go('home');return}const v=$('#v-editor');ED.focus=false;ED.panel='closed';v.classList.remove('v-editor-focus');
+ v.innerHTML=`<header class="top"><button class="ib rp" id="e-back" aria-label="ホームへ戻る">${I('chevl')}</button><span class="savest mono" id="savest">✓ 保存済み</span><span class="sp"></span><button class="ib rp" id="e-undo" aria-label="元に戻す">${I('undo')}</button><button class="ib rp" id="e-redo" aria-label="やり直す">${I('redo')}</button><button class="ib rp" id="e-panel" aria-label="プロパティ">${I('panel')}</button><button class="ib rp" id="e-more" aria-label="その他">${I('dots')}</button><button class="btn fexit keep" id="e-fexit">${I('focus')}集中モード終了</button></header>
+ <div class="ed-wrap ${S.settings.pcPanel?'':'pcc'}" id="ed-wrap"><div class="ed-main"><div class="ed-head"><input id="ed-title" class="ed-title" placeholder="無題の思考" value="${esc(t.title)}" enterkeyhint="next" aria-label="タイトル"><div class="ed-meta mono"><span>${tpl(t).code}</span><span>·</span><span id="ed-st">${STATUS[t.status]}</span><div class="segc" role="tablist"><button data-vw="outline" class="${ED.view==='outline'?'on':''}">${'アウトライン'}</button><button data-vw="tree" class="${ED.view==='tree'?'on':''}">ツリー</button></div></div></div><div id="ed-body"></div></div>
+ <aside class="panel" id="panel" data-s="closed" aria-label="プロパティ"></aside></div>`;
+ $('#e-back').onclick=()=>go('home');$('#e-undo').onclick=undo;$('#e-redo').onclick=redo;$('#e-panel').onclick=togglePanel;$('#e-more').onclick=e=>moreMenu(e.clientX-200,e.clientY+12);$('#e-fexit').onclick=()=>setFocusMode(false);
+ const ti=$('#ed-title');let tsnap=false,tt=null;ti.addEventListener('input',()=>{if(!tsnap){snap();tsnap=true}clearTimeout(tt);tt=setTimeout(()=>tsnap=false,1000);T().title=ti.value;touch()});ti.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();focusNode(T().root.id)}});
+ $$('[data-vw]',v).forEach(b=>b.onclick=()=>{ED.view=b.dataset.vw;$$('[data-vw]',v).forEach(x=>x.classList.toggle('on',x===b));hideNodebar(true);renderBody()});
+ renderBody();renderPanel();updUndo();setSaveState('saved')}
+function updEditorTop(){const t=T();if(!t)return;const s=$('#ed-st');if(s)s.textContent=STATUS[t.status]}
+function renderBody(){if(ED.view==='tree')renderTree();else renderOutline()}
+function renderOutline(){const t=T(),b=$('#ed-body');let h='<div class="outline" id="outline">';(function w(n,d){const has=n.children.length>0;h+=`<div class="nd${d===0?' d0':''}" data-id="${n.id}" style="padding-left:${Math.min(d,8)*1.05}rem"><button class="car ${has?(n.collapsed?'closed':''):'none'}" data-op="tog" aria-label="折りたたみ">${I('chevd')}</button><button class="hd" data-op="hd" aria-label="項目の操作(ドラッグで並べ替え)">${I('grip')}</button><span class="lb ${d===0?'d0':''}">${esc(labelOf(t,n,d))}</span><div class="tx" contenteditable="true" spellcheck="false" role="textbox" aria-label="${esc(labelOf(t,n,d))}" data-ph="${esc(phOf(t,n,d))}">${esc(n.text)}</div></div>`;if(!n.collapsed)n.children.forEach(c=>w(c,d+1))})(t.root,0);
+ h+=`<button class="addrow rp" id="o-add">${I('plus')}${esc(labelOf(t,{label:null},1))}を追加</button></div>`;b.innerHTML=h;bindOutline()}
+let typing=false,typT=null;
+function bindOutline(){const O=$('#outline');
+ $('#o-add').onclick=()=>opAddChild(T().root.id);
+ O.addEventListener('input',e=>{const tx=e.target.closest('.tx');if(!tx)return;const id=tx.parentElement.dataset.id;if(!typing){snap();typing=true}clearTimeout(typT);typT=setTimeout(()=>typing=false,1000);const f=findNode(T().root,id);if(f){f.node.text=tx.textContent;if(!tx.textContent)tx.innerHTML='';touch()}});
+ O.addEventListener('paste',e=>{const tx=e.target.closest('.tx');if(!tx)return;e.preventDefault();const s=(e.clipboardData||window.clipboardData).getData('text').replace(/\s*\n\s*/g,' ');document.execCommand('insertText',false,s)});
+ O.addEventListener('keydown',e=>{const tx=e.target.closest('.tx');if(!tx)return;const id=tx.parentElement.dataset.id;const comp=e.isComposing||e.keyCode===229;if(comp)return;
+  if(e.key==='Enter'){e.preventDefault();if(e.shiftKey)return;opAddSibling(id);return}
+  if(e.key==='Tab'){e.preventDefault();e.shiftKey?opOutdent(id):opIndent(id);return}
+  if(e.key==='Backspace'&&tx.textContent===''){const f=findNode(T().root,id);if(f&&f.parent&&!f.node.children.length){e.preventDefault();opDelete(id,true)}return}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo();return}
+  if(e.altKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();opMove(id,e.key==='ArrowUp'?-1:1);return}
+  if(e.key==='ArrowUp'||e.key==='ArrowDown'){const rows=$$('.nd .tx',O);const i=rows.indexOf(tx);const sel=getSelection();const r=sel.rangeCount?sel.getRangeAt(0).getBoundingClientRect():null;const tr=tx.getBoundingClientRect();const atTop=!r||r.top===0||r.top-tr.top<14,atBot=!r||r.bottom===0||tr.bottom-r.bottom<14;if(e.key==='ArrowUp'&&atTop&&i>0){e.preventDefault();focusEl(rows[i-1])}if(e.key==='ArrowDown'&&atBot&&i<rows.length-1){e.preventDefault();focusEl(rows[i+1])}}});
+ O.addEventListener('focusin',e=>{const tx=e.target.closest('.tx');if(!tx)return;ED.focusId=tx.parentElement.dataset.id;showNodebar();setTimeout(()=>{try{tx.scrollIntoView({block:'nearest',behavior:'smooth'})}catch(_){}},320)});
+ O.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.closest('#outline .tx'))hideNodebar()},180));
+ O.addEventListener('click',e=>{const tg=e.target.closest('[data-op=tog]');if(tg){const id=tg.parentElement.dataset.id;const f=findNode(T().root,id);if(f&&f.node.children.length){f.node.collapsed=!f.node.collapsed;touch();renderOutline()}}});
+ let dr=null;
+ O.addEventListener('pointerdown',e=>{const hd=e.target.closest('.hd');if(!hd)return;e.preventDefault();const row=hd.parentElement;const id=row.dataset.id;dr={id,row,y0:e.clientY,x0:e.clientX,moved:false};try{hd.setPointerCapture(e.pointerId)}catch(_){}});
+ O.addEventListener('pointermove',e=>{if(!dr)return;const dy=e.clientY-dr.y0;if(!dr.moved){if(Math.abs(dy)<7)return;const f=findNode(T().root,dr.id);if(!f||!f.parent){dr.cancel=true;return}dr.moved=true;dr.f=f;dr.sibs=f.parent.children.map(c=>$(`.nd[data-id="${c.id}"]`,O));dr.mids=dr.sibs.map(r=>{const b=r.getBoundingClientRect();return b.top+b.height/2});dr.row.classList.add('drag');try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}}if(dr.cancel)return;dr.row.style.transform=`translateY(${dy}px)`;const y=e.clientY;let ti=0;dr.mids.forEach((m,i)=>{if(i!==dr.f.idx&&m<y)ti++});dr.target=ti});
+ const dend=e=>{if(!dr)return;const d=dr;dr=null;d.row.classList.remove('drag');d.row.style.transform='';if(!d.moved){if(e.type==='pointerup')nodeMenu(d.id,e.clientX,e.clientY);return}if(d.cancel)return;if(d.target!==undefined&&d.target!==d.f.idx){snap();const a=d.f.parent.children;a.splice(d.f.idx,1);a.splice(d.target,0,d.f.node);touch();renderOutline();flashNode(d.id)}};
+ O.addEventListener('pointerup',dend);O.addEventListener('pointercancel',dend)}
+function focusEl(el,end=true){if(!el)return;el.focus({preventScroll:true});try{const r=document.createRange();r.selectNodeContents(el);r.collapse(!end?true:false);const s=getSelection();s.removeAllRanges();s.addRange(r)}catch(_){}}
+function focusNode(id){if(ED.view!=='outline'){ED.view='outline';$$('[data-vw]').forEach(x=>x.classList.toggle('on',x.dataset.vw==='outline'));renderOutline()}const el=$(`#outline .nd[data-id="${id}"] .tx`);if(el){focusEl(el);setTimeout(()=>{try{el.scrollIntoView({block:'nearest'})}catch(_){}},50)}}
+function flashNode(id){const r=$(`#outline .nd[data-id="${id}"]`);if(r){r.classList.remove('hit');void r.offsetWidth;r.classList.add('hit')}}
+function visibleIds(){const ids=[];(function w(n){ids.push(n.id);if(!n.collapsed)n.children.forEach(w)})(T().root);return ids}
+function after(fid){touch();renderOutline();if(fid)focusNode(fid)}
+function opAddChild(id){const f=findNode(T().root,id);if(!f)return;snap();const tp=tpl(T());const n=(f.depth===0&&tp.child1)?tp.child1():mk('');f.node.children.push(n);f.node.collapsed=false;after(n.id)}
+function opAddSibling(id){const f=findNode(T().root,id);if(!f)return;if(!f.parent)return opAddChild(id);snap();const n=mk('');f.parent.children.splice(f.idx+1,0,n);after(n.id)}
+function opIndent(id){const f=findNode(T().root,id);if(!f||!f.parent)return;if(f.idx===0)return toast('上に同じ階層の項目がないため、右へ移動できません');snap();const prev=f.parent.children[f.idx-1];f.parent.children.splice(f.idx,1);prev.children.push(f.node);prev.collapsed=false;f.node.label=null;f.node.ph=null;after(id)}
+function opOutdent(id){const f=findNode(T().root,id);if(!f||!f.parent)return;const g=findNode(T().root,f.parent.id);if(!g.parent)return toast('これ以上左へは移動できません');snap();f.parent.children.splice(f.idx,1);g.parent.children.splice(g.idx+1,0,f.node);f.node.label=null;f.node.ph=null;after(id)}
+function opMove(id,dir){const f=findNode(T().root,id);if(!f||!f.parent)return;const j=f.idx+dir;const a=f.parent.children;if(j<0||j>=a.length)return;snap();[a[f.idx],a[j]]=[a[j],a[f.idx]];after(id);flashNode(id)}
+function opDelete(id,fromKey){const f=findNode(T().root,id);if(!f)return;if(!f.parent)return toast('一番上の項目は削除できません');const ids=visibleIds();const prev=ids[ids.indexOf(id)-1];snap();f.parent.children.splice(f.idx,1);after(prev);toast(f.node.children.length?'下の項目ごと削除しました':'削除しました',{action:{label:'元に戻す',fn:undo}})}
+function nodeMenu(id,x,y){const f=findNode(T().root,id);if(!f)return;const isRoot=!f.parent;const items=[{label:'下の階層に追加',icon:'child',fn:()=>opAddChild(id)}];if(!isRoot)items.push({label:'同じ階層に追加',icon:'enter',fn:()=>opAddSibling(id)},{label:'右へ(1段下げる)',icon:'indent',fn:()=>opIndent(id)},{label:'左へ(1段上げる)',icon:'outdent',fn:()=>opOutdent(id)},{label:'上へ移動',icon:'up',fn:()=>opMove(id,-1)},{label:'下へ移動',icon:'down',fn:()=>opMove(id,1)});if(f.node.children.length)items.push({label:f.node.collapsed?'展開する':'折りたたむ',icon:'chevd',fn:()=>{f.node.collapsed=!f.node.collapsed;touch();renderOutline()}});if(!isRoot)items.push('-',{label:'削除',icon:'trash',dg:true,fn:()=>opDelete(id)});menu(x,y,items)}
+/* 項目操作バー */
+let nbKeep=false;
+function buildNodebar(){const nb=$('#nodebar');nb.innerHTML=[['child','child','下に追加'],['sib','enter','同階層'],['ind','indent','右へ'],['out','outdent','左へ'],['up','up','上へ'],['down','down','下へ'],['del','trash','削除']].map(([k,ic,l])=>`<button data-nb="${k}" class="${k==='del'?'dgb':''}" aria-label="${l}">${I(ic)}<span>${l}</span></button>`).join('');
+ nb.addEventListener('pointerdown',()=>{nbKeep=true;setTimeout(()=>nbKeep=false,600)});nb.addEventListener('mousedown',e=>e.preventDefault());
+ nb.addEventListener('click',e=>{const b=e.target.closest('[data-nb]');if(!b||!ED.focusId)return;const id=ED.focusId;({child:()=>opAddChild(id),sib:()=>opAddSibling(id),ind:()=>opIndent(id),out:()=>opOutdent(id),up:()=>opMove(id,-1),down:()=>opMove(id,1),del:()=>opDelete(id)})[b.dataset.nb]()})}
+function showNodebar(){if(Nav.view!=='editor'||(!coarse&&wide()))return;$('#nodebar').classList.add('on')}
+function hideNodebar(force){if(!force&&nbKeep)return;$('#nodebar').classList.remove('on')}
+/* ツリー表示 */
+function renderTree(){const t=T(),b=$('#ed-body');const node=(n,d)=>{const kids=n.children.length&&!n.collapsed?`<div class="tk">${n.children.map(c=>node(c,d+1)).join('')}</div>`:'';return`<div class="tn"><button class="tbx rp ${d===0?'d0':''}" data-id="${n.id}"><span class="tl">${esc(labelOf(t,n,d))}${n.collapsed&&n.children.length?`<span class="more">+${n.children.length}</span>`:''}</span>${n.text?esc(n.text):`<span class="emp">(未入力)</span>`}</button>${kids}</div>`};
+ b.innerHTML=`<div class="zoom mono"><button class="ib rp" id="z-out" aria-label="縮小">−</button><span id="z-v">${Math.round(ED.zoom*100)}%</span><button class="ib rp" id="z-in" aria-label="拡大">${I('plus')}</button><span style="margin-left:.5rem">項目をタップで編集</span></div><div class="treewrap"><div class="tvroot" id="tvroot" style="transform:scale(${ED.zoom})">${node(t.root,0)}</div></div>`;
+ const z=d=>{ED.zoom=Math.min(1.6,Math.max(.4,Math.round((ED.zoom+d)*10)/10));$('#tvroot').style.transform=`scale(${ED.zoom})`;$('#z-v').textContent=Math.round(ED.zoom*100)+'%'};$('#z-in').onclick=()=>z(.1);$('#z-out').onclick=()=>z(-.1);
+ $$('.tbx',b).forEach(x=>x.onclick=()=>{const id=x.dataset.id;focusNode(id);flashNode(id)})}
+/* パネル */
+function togglePanel(){if(wide()){S.settings.pcPanel=!S.settings.pcPanel;dirty();$('#ed-wrap').classList.toggle('pcc',!S.settings.pcPanel)}else setPanel(ED.panel==='closed'?'half':'closed')}
+let panelH=null;
+function setPanel(s){const p=$('#panel');if(!p)return;const was=ED.panel;ED.panel=s;p.dataset.s=s;if(s==='closed'&&panelH){Back.close(panelH);panelH=null}if(s!=='closed'&&was==='closed'&&!wide()){panelH=Back.open(()=>{panelH=null;setPanel('closed')});panelH.closeUI=()=>setPanel('closed')}$('#p-size')&&($('#p-size').innerHTML=I(s==='full'?'down':'up'))}
+function renderPanel(){const t=T(),p=$('#panel');if(!p)return;let n=0,dep=0,emp=0;walk(t.root,(x,d)=>{n++;dep=Math.max(dep,d);if(!x.text.trim())emp++});
+ p.innerHTML=`<div class="grab pgrab" id="p-grab"><span></span></div><div class="phd"><span class="t mono">PROPERTIES</span><button class="ib rp pgrab" id="p-size" aria-label="大きさ切替">${I('up')}</button><button class="ib rp" id="p-close" aria-label="パネルを最小化">${I('x')}</button></div><div class="pbody">
+ <div class="psec"><div class="pt">状態</div><div class="seg" id="p-st">${Object.entries(STATUS).map(([k,l])=>`<button data-s="${k}" class="${t.status===k?'on':''}">${l}</button>`).join('')}</div></div>
+ <div class="psec"><div class="pt">MECEチェック ${help('MECE')}</div><label class="chk"><input type="checkbox" data-m="a" ${t.mece.a?'checked':''}>漏れはないか</label><label class="chk"><input type="checkbox" data-m="b" ${t.mece.b?'checked':''}>ダブりはないか</label><label class="chk"><input type="checkbox" data-m="c" ${t.mece.c?'checked':''}>同じ階層の粒度はそろっているか ${help('粒度')}</label><div style="margin-top:.6rem"><button class="btn" id="p-auto">${I('check')}自動チェック</button></div></div>
+ <div class="psec"><div class="pt">メモ</div><textarea class="inp" id="p-memo" placeholder="気づいたこと、前提条件、出典など">${esc(t.memo)}</textarea></div>
+ <div class="psec"><div class="pt">AIレビュー</div><button class="btn ac full" id="p-ai">${I('ai')}AIに提出</button><div id="p-rv" style="margin-top:.6rem">${t.reviews.length?t.reviews.map((r,i)=>`<button class="rv" data-r="${i}"><span class="d">${fdate(r.t).slice(5)}</span><span class="x">${esc(r.text)}</span></button>`).join(''):'<p style="font-size:.78rem;color:var(--sub);margin:.3rem 0 0">AIの返答を保存すると、ここに履歴が残ります。</p>'}</div></div>
+ <div class="psec"><div class="pt">情報</div><div class="mono" style="font-size:.72rem;color:var(--sub);line-height:2">型 ${esc(tpl(t).name)}<br>項目 ${n} · 深さ ${dep+1} · 未入力 ${emp}<br>作成 ${fdate(t.created)}<br>更新 ${fdate(t.updated)}</div></div></div>`;
+ $('#p-close').onclick=()=>{if(wide()){S.settings.pcPanel=false;dirty();$('#ed-wrap').classList.add('pcc')}else setPanel('closed')};
+ $('#p-size').onclick=()=>setPanel(ED.panel==='full'?'half':'full');
+ const g=$('#p-grab');let y0=null;g.addEventListener('pointerdown',e=>{y0=e.clientY;g.setPointerCapture(e.pointerId)});g.addEventListener('pointerup',e=>{if(y0===null)return;const dy=e.clientY-y0;y0=null;if(dy<-40)setPanel('full');else if(dy>40)setPanel(ED.panel==='full'?'half':'closed');else setPanel(ED.panel==='full'?'half':'full')});
+ $$('#p-st button').forEach(b=>b.onclick=()=>{setStatus(t.id,b.dataset.s);$$('#p-st button').forEach(x=>x.classList.toggle('on',x===b));updEditorTop()});
+ $$('[data-m]',p).forEach(c=>c.onchange=()=>{t.mece[c.dataset.m]=c.checked;touch()});
+ $('#p-auto').onclick=meceCheck;
+ const m=$('#p-memo');let ms=false,mt=null;m.oninput=()=>{if(!ms){snap();ms=true}clearTimeout(mt);mt=setTimeout(()=>ms=false,1000);t.memo=m.value;touch()};
+ $('#p-ai').onclick=openAI;$$('[data-r]',p).forEach(b=>b.onclick=()=>reviewSheet(+b.dataset.r))}
+function reviewSheet(i){const t=T();const r=t.reviews[i];if(!r)return;const s=sheet(`<div class="mono" style="font-size:.7rem;color:var(--sub)">${fdate(r.t)} · ${esc(r.kind||'')}</div><p style="white-space:pre-wrap;font-size:.88rem;line-height:1.8">${esc(r.text)}</p><div class="btns"><button class="btn" id="rv-copy">${I('copy')}コピー</button><button class="btn dg" id="rv-del">${I('trash')}削除</button></div>`,{title:'AIの返答'});$('#rv-copy',s.el).onclick=()=>copyText(r.text);$('#rv-del',s.el).onclick=async()=>{const v=await dialog('この返答を削除しますか?','削除すると元に戻せません。',[{label:'キャンセル',v:0},{label:'削除',v:1,cls:'dg'}]);if(v){t.reviews.splice(i,1);touch();s.close();renderPanel()}}}
+let focusH=null;
+function setFocusMode(on){if(ED.focus===on)return;ED.focus=on;$('#v-editor').classList.toggle('v-editor-focus',on);if(on){setPanel('closed');focusH=Back.open(()=>{focusH=null;setFocusMode(false)});focusH.closeUI=()=>setFocusMode(false);toast('集中モード: パネルとメニューを隠しました')}else if(focusH){Back.close(focusH);focusH=null}}
+function moreMenu(x,y){const t=T();menu(x,y,[{label:'AIに提出',icon:'ai',fn:openAI},{label:'MECE自動チェック',icon:'check',fn:meceCheck},{label:'集中モード',icon:'focus',fn:()=>setFocusMode(true)},{label:'画像で書き出し',icon:'image',fn:exportPng},'-',{label:t.pinned?'ピン留めを外す':'ピン留めする',icon:'pin',fn:()=>togglePin(t.id)},{label:'複製',icon:'copy',fn:()=>dupThought(t.id)},{label:'ゴミ箱へ移動',icon:'trash',dg:true,fn:()=>trashThought(t.id)}])}
+function leaveEditor(){flush();hideNodebar(true);if(focusH){Back.close(focusH);focusH=null}if(panelH){Back.close(panelH);panelH=null}ED.panel='closed';const t=T();if(t&&isEmptyT(t)){S.thoughts=S.thoughts.filter(x=>x.id!==t.id);UNDO.delete(t.id);flush()}}
+/* MECE自動チェック */
+function meceCheck(){const t=T();const iss=[];walk(t.root,(n,d)=>{const lb=labelOf(t,n,d);if(!n.text.trim())iss.push(`「${lb}」に未入力の項目があります`);if(n.children.length===1)iss.push(`「${n.text||lb}」の下が1つだけです。分解に漏れがないか確認しましょう`);const seen=new Set();n.children.forEach(c=>{const k=c.text.trim().replace(/\s/g,'').toLowerCase();if(k&&seen.has(k))iss.push(`「${n.text||lb}」の下に同じ内容「${c.text.trim()}」が重複しています`);seen.add(k)})});
+ const ok=!iss.length;const s=sheet(`${ok?`<div class="iss ok">${I('check')}<span>形式上の問題は見つかりませんでした。</span></div>`:[...new Set(iss)].slice(0,30).map(x=>`<div class="iss">${I('alert')}<span>${esc(x)}</span></div>`).join('')}<p style="font-size:.76rem;color:var(--sub);margin:1rem 0 0;line-height:1.7">自動チェックは「未入力・分解が1つだけ・同じ文言の重複」などの形式面だけを確認します。内容の漏れやダブりは、パネルのチェックリストで自分の目で確認しましょう。AIに提出して指摘してもらうこともできます。</p>`,{title:ok?'自動チェック: 問題なし':`自動チェック: ${[...new Set(iss)].length}件`});if(!ok)setTimeout(()=>shake($('.sheet',s.el)),420)}
+/* AIに提出 */
+const PROMPTS={strict:['厳しめ','あなたは論理的思考の厳しいレビュアーです。以下の思考について、(1)論理の飛躍 (2)根拠の弱さ (3)MECEの漏れ・ダブり (4)結論と理由のつながり を具体的に指摘し、それぞれ改善案を示してください。良い点の説明は短くて構いません。'],gentle:['やさしめ','以下の思考について、良い点を先に挙げたうえで、改善できる点を2〜3個、初心者にもわかる言葉でやさしく教えてください。'],mece:['MECE確認','以下のツリーの各階層について、MECE(漏れなく・ダブりなく)になっているかを確認し、漏れている観点や重複している要素を具体的に挙げてください。'],counter:['反論','以下の結論に対して想定される反論を3つ挙げ、それぞれに対する再反論のヒントを示してください。']};
+function toMarkdown(t,kind){const lines=[];if(kind)lines.push(PROMPTS[kind][1],'');lines.push('## 思考: '+titleOf(t),`- 型: ${tpl(t).name}`,`- 状態: ${STATUS[t.status]}`,'','### 構造');walk(t.root,(n,d)=>lines.push(`${'  '.repeat(d)}- [${labelOf(t,n,d)}] ${n.text.trim()||'(未入力)'}`));if(t.memo.trim())lines.push('','### メモ',t.memo.trim());return lines.join('\n')}
+function openAI(){const t=T();let kind='strict';const s=sheet(`<div class="seg" id="ai-k" style="display:flex;width:100%">${Object.entries(PROMPTS).map(([k,[l]])=>`<button data-k="${k}" class="${k===kind?'on':''}" style="flex:1">${l}</button>`).join('')}</div><pre class="md" id="ai-md"></pre><div class="btns"><button class="btn ac" id="ai-copy">${I('copy')}コピー</button>${navigator.share?`<button class="btn" id="ai-share">${I('share')}共有</button>`:''}</div><span class="lbl">コピーした文章をClaudeなどのAIチャットに貼り付けて送信します。返ってきた答えは下に貼り付けて保存できます。</span><textarea class="inp" id="ai-res" placeholder="AIの返答をここに貼り付け"></textarea><div style="margin-top:.6rem"><button class="btn pri full" id="ai-save">${I('check')}返答を保存</button></div>`,{title:'AIに提出'});
+ const upd=()=>{$('#ai-md',s.el).textContent=toMarkdown(t,kind)};upd();
+ $$('#ai-k button',s.el).forEach(b=>b.onclick=()=>{kind=b.dataset.k;$$('#ai-k button',s.el).forEach(x=>x.classList.toggle('on',x===b));upd()});
+ $('#ai-copy',s.el).onclick=()=>copyText(toMarkdown(t,kind),'AI用にコピーしました');
+ const sh=$('#ai-share',s.el);if(sh)sh.onclick=()=>navigator.share({title:titleOf(t),text:toMarkdown(t,kind)}).catch(e=>{if(e&&e.name!=='AbortError')logError(e,'共有')});
+ $('#ai-save',s.el).onclick=()=>{const v=$('#ai-res',s.el).value.trim();if(!v){shake($('#ai-res',s.el));toast('返答を貼り付けてから保存してください');return}t.reviews.unshift({t:Date.now(),kind:PROMPTS[kind][0],text:v});touch();s.close();renderPanel();toast('AIの返答を保存しました')}}
+async function copyText(s,msg='コピーしました'){try{await navigator.clipboard.writeText(s);toast(msg)}catch(_){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(__){}ta.remove();toast(ok?msg:'コピーできませんでした。手動で選択してください')}}
+/* 画像で書き出し */
+function exportPng(){const t=T();const dark=resolved()==='dark';const c=document.createElement('canvas');const x=c.getContext('2d');const W=1080,P=64,LH=46,F='system-ui,"Hiragino Sans","Noto Sans JP",sans-serif',M='ui-monospace,Menlo,monospace';const rows=[];walk(t.root,(n,d)=>rows.push({n,d}));
+ const wrap=(s,w)=>{x.font=`30px ${F}`;const out=[];let line='';for(const ch of s){if(x.measureText(line+ch).width>w){out.push(line);line=ch}else line+=ch}out.push(line);return out};
+ const L=rows.map(r=>{const lb=labelOf(t,r.n,r.d);x.font=`20px ${M}`;const lw=x.measureText(lb).width+20;const ind=P+r.d*44;return{...r,lb,lw,ind,lines:wrap(r.n.text.trim()||'(未入力)',W-ind-lw-16-P)}});
+ const H=P+60+40+40+L.reduce((a,r)=>a+r.lines.length*LH+14,0)+P;c.width=W;c.height=H;
+ x.fillStyle=dark?'#0E0E0D':'#FAFAF9';x.fillRect(0,0,W,H);const tx=dark?'#EDEDEA':'#111110',sub=dark?'#8F8E88':'#6B6A65',ln=dark?'#3A3A36':'#D3D1C7',ac=S.settings.accent;
+ x.textBaseline='top';x.fillStyle=tx;x.font=`500 44px ${F}`;x.fillText(titleOf(t).slice(0,40),P,P);x.fillStyle=sub;x.font=`20px ${M}`;x.fillText(`${tpl(t).code} · ${STATUS[t.status]} · ${fdate(t.updated)}`,P,P+64);
+ let y=P+60+40+40;for(const r of L){x.strokeStyle=r.d===0?ac:ln;x.lineWidth=1.5;x.strokeRect(r.ind,y+6,r.lw,28);x.fillStyle=r.d===0?ac:sub;x.font=`20px ${M}`;x.fillText(r.lb,r.ind+10,y+10);x.fillStyle=tx;x.font=`${r.d===0?'500 ':''}30px ${F}`;r.lines.forEach((l,i)=>x.fillText(l,r.ind+r.lw+16,y+i*LH));y+=r.lines.length*LH+14}
+ x.fillStyle=sub;x.font=`18px ${M}`;x.fillText('logitore',W-P-90,H-P+20);
+ c.toBlob(b=>{if(!b)return toast('画像を作れませんでした');download(b,`logitore_${titleOf(t).slice(0,20).replace(/[\\/:*?"<>|\s]/g,'_')}.png`);toast('画像を書き出しました')},'image/png')}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+
+/* ===== ドリル ===== */
+const Q=[
+{tag:'So What?',q:'【事実】売上が前年比20%減。来店客数はほぼ横ばい。客単価は25%下がった。\n\nここから言えること(So What?)として最も適切なのは?',c:['売上減の主な原因は客単価の低下である','来店客数を増やす施策が最優先である','売上はすでに回復に向かっている','店舗の数が足りていない'],e:'客数は横ばいで客単価が下がっているので、売上減の主因は客単価と言えます。「客数を増やす」は事実から直接は導けません。'},
+{tag:'Why So?',q:'「新システムはA案を採用すべきだ」という結論を支える根拠として最も適切なのは?',c:['A案はB案より導入費用が30%安く、導入期間も同じである','部長がA案を気に入っている','前回もA社に依頼した','なんとなくA案のほうが良さそうだ'],e:'比較できる事実(費用・期間)が根拠になります。好みや前例は「なぜA案が良いのか」の説明になっていません。'},
+{tag:'MECE',q:'顧客を年齢で分けるとき、MECE(漏れなく・ダブりなく)になっているのは?',c:['19歳以下/20〜39歳/40歳以上','10代/20代/30代','学生/社会人/女性','10〜20代/20〜30代/30代以上'],e:'「19歳以下/20〜39歳/40歳以上」は全年齢を重なりなく覆っています。「10代/20代/30代」は40代以上が漏れ、「学生/女性」は重なりがあります。'},
+{tag:'因果',q:'「アイスクリームがよく売れる日ほど水難事故が多い。だからアイスが事故を増やしている」\n\nこの推論の問題点は?',c:['気温という第三の要因を見落としている','データの数が多すぎる','アイスの値段を考えていない','事故の種類を分けていない'],e:'暑い日にはアイスも売れ、海や川に行く人も増えます。両方に影響する「第三の要因」があると、相関があっても因果関係とは言えません。'},
+{tag:'一般化',q:'「友人3人に聞いたら、誰もこのアプリを使っていなかった。だから日本人はこのアプリを使っていない」\n\nこの推論の問題点は?',c:['少ない例から全体を決めつけている(早まった一般化)','友人の年齢を聞いていない','アプリの名前が書かれていない','質問の仕方が丁寧でない'],e:'3人というごく少ないサンプルから全体を結論づけています。結論の範囲に見合うデータが必要です。'},
+{tag:'空・雨・傘',q:'空・雨・傘の型で、「空(事実)」に当たるのはどれ?',c:['今月の問い合わせ件数は前月比30%減だった','需要が落ちてきているようだ','販促キャンペーンを前倒しする','担当者のやる気が下がっている'],e:'「空」は誰が見ても同じになる観察事実です。「需要が落ちている」は解釈(雨)、「前倒しする」は行動(傘)です。'},
+{tag:'空・雨・傘',q:'「雲が厚く、湿度が高い」という事実(空)に対して、「雨(解釈)」に当たるのは?',c:['これから雨が降りそうだ','傘を持って出かける','今日の最高気温は18度だ','外出をやめて家で過ごした'],e:'事実から導いた「見立て」が雨です。傘を持つのは行動(傘)、気温は別の事実(空)です。'},
+{tag:'論点',q:'「この企画はコストが高すぎる」という指摘に対し、「でも君も去年の企画で失敗したよね」と返した。\n\nこの返し方の問題は?',c:['指摘の中身ではなく相手自身を攻撃している','反論が短すぎる','数字を使っていない','敬語を使っていない'],e:'論点(コスト)に答えず、相手の過去を持ち出す「人への攻撃」です。指摘の妥当性とは関係ありません。'},
+{tag:'二分法',q:'「この案に賛成しないなら、あなたは改革に反対ということだ」\n\nこの主張の問題点は?',c:['他の選択肢があるのに2つしかないように扱っている','根拠となる数字が多すぎる','結論を先に言っている','相手の名前を出していない'],e:'「条件付き賛成」「別の改革案を支持」など他の立場があり得ます。選択肢を不当に2つに絞る「誤った二分法」です。'},
+{tag:'So What?',q:'【事実】競合3社が値下げした。その後2か月で当社のシェアは5ポイント下がった。同じ期間、当社への問い合わせも減った。\n\nSo What?として最も適切なのは?',c:['競合の値下げで当社の価格面の魅力が相対的に下がり、シェア低下の一因になっている可能性が高い','当社の商品は品質が悪い','問い合わせ窓口の対応が悪い','市場全体が縮小している'],e:'事実の並びから素直に言えるのは、競合の値下げとの関係です。品質や窓口対応は、示された事実からは言えません。'},
+{tag:'MECE',q:'会社の費用を分ける切り口として、MECEになっているのは?',c:['固定費/変動費','人件費/広告費/本社の費用','大きい費用/重要な費用','今月の費用/毎月の費用'],e:'固定費(売上に関係なくかかる)と変動費(売上に応じて増減)は、すべての費用を重なりなく分けられます。'},
+{tag:'根拠',q:'「この商品は若者に人気がある」を示す根拠として、最も信頼できるのは?',c:['10〜20代1,000人への調査で、購入経験者が45%だった','SNSで1件、絶賛する投稿を見た','店員が「若い人がよく来る」と言っていた','自分の子どもが欲しがっている'],e:'対象と人数がはっきりした調査データが最も信頼できます。1件の投稿や個人の感想は偏っている可能性があります。'},
+{tag:'循環論法',q:'「彼の話は信用できる。なぜなら、彼は信用できる人物だからだ」\n\nこの推論の問題点は?',c:['結論と根拠が同じことを言っている(循環論法)','根拠が多すぎる','具体的な人物名がない','相手を褒めすぎている'],e:'根拠が結論を言い換えただけなので、何も証明していません。独立した根拠(過去の実績など)が必要です。'},
+{tag:'バイアス',q:'「成功した起業家に聞くと、皆が早起きだった。だから早起きすれば起業で成功できる」\n\nこの推論の問題点は?',c:['早起きでも失敗した人を調べていない(生存者バイアス)','起業家の人数が多すぎる','早起きの定義が厳しすぎる','成功の基準が高すぎる'],e:'成功者だけを見ると、失敗した人の中にも早起きが多い可能性を見落とします。比べる相手が必要です。'},
+{tag:'ピラミッド',q:'上司への報告の順番として、ピラミッド構造に沿っているのは?',c:['結論 → 理由 → 詳しいデータ','経緯 → データ → 結論','データ → 感想 → 結論','雑談 → 経緯 → 結論'],e:'ピラミッド構造では結論を最初に伝え、その理由と根拠を続けます。聞き手は全体像をつかんでから詳細を聞けます。'},
+{tag:'ロジックツリー',q:'「売上を上げる」をHowツリーで分解するとき、1段目としてMECEなのは?',c:['客数を増やす/客単価を上げる','広告を出す/SNSを頑張る','新商品を出す/値下げする','店長が頑張る/店員が頑張る'],e:'売上=客数×客単価なので、この2つで漏れなくダブりなく分けられます。他の選択肢は施策の例で、全体を覆っていません。'},
+{tag:'因果',q:'「病院に行く人ほど病気が多い。だから病院に行くと病気になる」\n\nこの推論の問題点は?',c:['原因と結果の向きが逆になっている','病院の数を数えていない','病気の種類が多すぎる','医師の意見を聞いていない'],e:'病気だから病院に行くのであって、逆ではありません。因果の向きを取り違える典型例です。'},
+{tag:'So What?',q:'【事実】アンケートで「操作がわかりにくい」が不満の1位。サポートへの問い合わせの6割が操作方法について。解約理由の上位にも「使い方がわからない」がある。\n\nSo What?として最も適切なのは?',c:['操作のわかりにくさが顧客満足と継続利用を下げている','価格を下げれば解約は減る','サポート担当を減らすべきだ','新機能を増やせば満足度が上がる'],e:'3つの事実がすべて「操作のわかりにくさ」を指しています。価格や新機能は、示された事実からは導けません。'},
+{tag:'Why So?',q:'「来期は営業を2名増やすべきだ」の根拠として最も適切なのは?',c:['今期は商談の3割を人手不足で断っており、1名あたり月500万円の受注見込みがある','他社も営業を増やしているらしい','営業部が忙しそうに見える','人が多いほうがにぎやかで良い'],e:'失っている機会と増員の効果が数字で示されている根拠が最も強いです。「らしい」「見える」は根拠として弱いです。'},
+{tag:'MECE',q:'旅行先を決める観点として、ダブりがあるのはどれ?',c:['費用/移動時間/観光地/海外','費用/移動時間/観光の楽しさ','費用/移動時間/気候','予算内か/移動が楽か/楽しめそうか'],e:'「海外」は場所の種類で、費用や移動時間とも重なる切り口です。同じ階層に違う種類の切り口を混ぜると、ダブりや粒度のズレが起きます。'}];
+function rng(seed){let a=0;for(const ch of String(seed))a=(a*31+ch.charCodeAt(0))|0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+let DS=null;
+function startToday(){const t=dk();let d=S.drill.today;if(!d||d.date!==t){d=S.drill.today={date:t,qs:shuffle([...Q.keys()],rng('q'+t)).slice(0,5),pos:0,res:[]};dirty()}DS={mode:'today',ref:d,qs:d.qs,pos:d.pos,res:d.res.slice(),answered:false}}
+function startPractice(){DS={mode:'practice',qs:shuffle([...Q.keys()],Math.random).slice(0,5),pos:0,res:[],answered:false}}
+function orderFor(qi){return shuffle([0,1,2,3],DS.mode==='today'?rng(DS.ref.date+'c'+qi):rng(Math.random()))}
+function renderDrill(){const v=$('#v-drill');const head=`<header class="top"><button class="ib rp" id="d-back" aria-label="ホームへ戻る">${I('chevl')}</button><span class="ttl">${DS.mode==='today'?'今日のドリル':'練習'}</span><span class="mono" style="font-size:.72rem;color:var(--sub);margin-right:.6rem">streak <span style="color:var(--ac)">${curStreak()}</span>d</span></header>`;
+ const segs=`<div class="segs" style="margin:0 1.25rem">${DS.qs.map((_,i)=>`<i class="${i<DS.res.length?(DS.res[i]?'ok':'ng'):''}"></i>`).join('')}</div>`;
+ if(DS.pos>=DS.qs.length){const c=DS.res.filter(Boolean).length;v.innerHTML=head+segs+`<div class="dq"><div class="qn mono">RESULT</div><div class="qt" style="font-size:1.5rem;font-weight:500">${DS.qs.length}問中 ${c}問 正解</div><p style="color:var(--sub);font-size:.88rem;margin-top:-.4rem">${c===DS.qs.length?'全問正解です。':c>=3?'良い調子です。解説を見直すとさらに定着します。':'間違えた問題の解説を読み返してみましょう。'}</p><div class="btns" style="margin:1rem 0"><button class="btn ac" id="d-more">${I('refresh')}もっと練習する</button><button class="btn" id="d-home">ホームへ</button></div>${statsHtml()}</div>`;$('#d-more').onclick=()=>{startPractice();renderDrill()};$('#d-home').onclick=()=>go('home')}
+ else{const qi=DS.qs[DS.pos],q=Q[qi],ord=orderFor(qi);DS.ord=ord;v.innerHTML=head+segs+`<div class="dq" id="d-card"><div class="qn mono"><span>Q${DS.pos+1}/${DS.qs.length}</span><span>·</span><span>${esc(q.tag)}</span></div><div class="qt">${esc(q.q)}</div><div id="d-ch">${ord.map((ci,i)=>`<button class="ch rp" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${esc(q.c[ci])}</span></button>`).join('')}</div><div id="d-after"></div></div>`;$$('.ch',v).forEach(b=>b.onclick=()=>answer(+b.dataset.i))}
+ $('#d-back').onclick=()=>go('home')}
+function statsHtml(){const d=S.drill;const rate=d.total?Math.round(d.correct/d.total*100):0;const days=[...Array(14)].map((_,i)=>dk(i-13));return`<div class="stats"><div class="stat"><b>${d.total}</b><span>解いた問題</span></div><div class="stat"><b>${rate}%</b><span>正答率</span></div><div class="stat"><b>${curStreak()}</b><span>連続日数</span></div></div><div class="pt" style="margin-top:1rem">直近14日の正答率</div><div class="bars">${days.map(k=>{const x=d.days[k];const r=x&&x.n?x.c/x.n:0;return`<div class="${x&&x.n?'':'z'}" style="height:${x&&x.n?Math.max(6,Math.round(r*100)):3}%" title="${k}"></div>`}).join('')}</div><div class="blab">${days.map(k=>`<span>${+k.slice(8)}</span>`).join('')}</div>`}
+function answer(i){if(DS.answered)return;DS.answered=true;const qi=DS.qs[DS.pos],q=Q[qi];const ok=DS.ord[i]===0;const bs=$$('.ch');bs.forEach((b,j)=>{if(DS.ord[j]===0)b.classList.add('ok');else if(j===i)b.classList.add('ng');else b.classList.add('dim')});
+ DS.res.push(ok);S.drill.total++;if(ok)S.drill.correct++;
+ if(DS.mode==='today'){const r=DS.ref;r.res=DS.res.slice();r.pos=DS.pos+1;const day=S.drill.days[r.date]||(S.drill.days[r.date]={n:0,c:0});day.n++;if(ok)day.c++;if(r.pos>=r.qs.length){const t=dk();if(S.drill.lastDone!==t){S.drill.streak=(S.drill.lastDone===dk(-1)?S.drill.streak:0)+1;S.drill.lastDone=t}}}
+ dirty();const segs=$$('#v-drill .segs i');if(segs[DS.pos])segs[DS.pos].className=ok?'ok':'ng';
+ if(!ok)shake($('#d-card'));const last=DS.pos+1>=DS.qs.length;
+ $('#d-after').innerHTML=`<div class="exp"><b>${ok?'正解':'不正解'}</b>${esc(q.e)}</div><button class="btn ${last?'ac':'pri'} full" id="d-next">${last?'結果を見る':'次の問題へ'}</button>`;
+ $('#d-next').onclick=()=>{DS.pos++;DS.answered=false;if(DS.pos>=DS.qs.length&&DS.res.filter(Boolean).length>=3)setTimeout(confetti,150);renderDrill();scrollTo(0,0)};
+ setTimeout(()=>{const n=$('#d-next');n&&n.scrollIntoView({block:'nearest',behavior:'smooth'})},80)}
+
+/* ===== ゴミ箱 ===== */
+function renderTrash(){const v=$('#v-trash');v.innerHTML=`<header class="top"><button class="ib rp" id="t-back" aria-label="ホームへ戻る">${I('chevl')}</button><span class="ttl">ゴミ箱</span>${S.trash.length?`<button class="btn dg" id="t-empty" style="min-height:2.2rem">空にする</button>`:''}</header><p class="mono" style="font-size:.7rem;color:var(--sub);padding:0 1.25rem">移動してから30日たつと自動で完全に削除されます。</p><div class="list">${S.trash.length?S.trash.map(t=>`<div class="row" style="touch-action:auto"><div class="sw-c" style="cursor:default"><div class="rmain"><div class="rtitle"><span class="t">${esc(titleOf(t))}</span></div><div class="meta mono">${tpl(t).code}<span>·</span>削除 ${rel(t.deletedAt)}<span>·</span>残り${Math.max(0,30-Math.floor((Date.now()-t.deletedAt)/864e5))}日</div></div><button class="btn" data-rs="${t.id}" style="min-height:2.2rem">復元</button><button class="ib rp" data-rm="${t.id}" aria-label="完全に削除" style="color:var(--dg)">${I('trash')}</button></div></div>`).join(''):`<div class="empty"><p>ゴミ箱は空です。</p></div>`}</div>`;
+ $('#t-back').onclick=()=>go('home');$$('[data-rs]',v).forEach(b=>b.onclick=()=>restoreThought(b.dataset.rs));
+ $$('[data-rm]',v).forEach(b=>b.onclick=async()=>{const r=await dialog('完全に削除しますか?','この操作は元に戻せません。',[{label:'キャンセル',v:0},{label:'完全に削除',v:1,cls:'dg'}]);if(r){S.trash=S.trash.filter(t=>t.id!==b.dataset.rm);dirty();renderTrash()}});
+ const e=$('#t-empty');if(e)e.onclick=async()=>{const r=await dialog('ゴミ箱を空にしますか?',`${S.trash.length}件の思考が完全に削除されます。この操作は元に戻せません。`,[{label:'キャンセル',v:0},{label:'空にする',v:1,cls:'dg'}]);if(r){S.trash=[];dirty();renderTrash();toast('ゴミ箱を空にしました')}}}
+
+/* ===== 設定 ===== */
+const ACCENTS=[['#378ADD','ブルー'],['#1D9E75','ティール'],['#D85A30','コーラル']];
+function renderSettings(){const v=$('#v-settings'),st=S.settings;const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" class="${String(cur)===String(k)?'on':''}">${l}</button>`).join('')}</div>`;
+ v.innerHTML=`<header class="top"><button class="ib rp" id="s-back" aria-label="ホームへ戻る">${I('chevl')}</button><span class="ttl">設定</span></header>
+ <div class="sec"><h2>DISPLAY</h2>
+ <div class="srow"><span class="sl">テーマ</span>${seg('s-theme',[['light','ライト'],['dark','ダーク'],['system','端末']],st.theme)}</div>
+ <div class="srow"><span class="sl">アクセント色</span><div class="sws">${ACCENTS.map(([c,l])=>`<button class="swc ${st.accent===c?'on':''}" data-c="${c}" style="background:${c}" aria-label="${l}"></button>`).join('')}</div></div>
+ <div class="srow"><span class="sl">文字サイズ</span>${seg('s-font',[[.9,'小'],[1,'標準'],[1.12,'大'],[1.25,'特大']],st.font)}</div>
+ <button class="srow" id="s-rm"><span class="sl">動きを減らす<small>アニメーションをほぼ止めます</small></span><span class="tg ${st.reduceMotion?'on':''}"></span></button></div>
+ <div class="sec"><h2>CONTROL</h2>
+ <button class="srow" id="s-bc"><span class="sl">「戻る」の確認<small>誤操作防止。オンのときは「戻る」を2回押すと実行されます</small></span><span class="tg ${st.backConfirm?'on':''}"></span></button></div>
+ <div class="sec"><h2>SECURITY</h2>
+ <button class="srow" id="s-pin"><span class="sl">PINロック<small>起動時と、1分以上離れて戻ったときにPINを求めます</small></span><span class="tg ${st.pinOn?'on':''}"></span></button></div>
+ <div class="sec"><h2>DATA</h2>
+ <button class="srow" id="s-exp"><span class="sl">書き出し(バックアップ)<small>最終: ${S.meta.lastExport?fdate(S.meta.lastExport):'未実施'}</small></span><span class="sv">${I('download')}</span></button>
+ <button class="srow" id="s-imp"><span class="sl">読み込み<small>書き出したファイルから復元・統合します</small></span><span class="sv">${I('upload')}</span></button>
+ <div class="srow"><span class="sl">書き出しの催促</span>${seg('s-bk',[[3,'3日'],[7,'7日'],[14,'14日'],[0,'オフ']],st.backupDays)}</div>
+ <button class="srow" id="s-per"><span class="sl">保存領域の保護<small id="s-per-s">確認中…</small></span><span class="sv">${I('chevr')}</span></button>
+ <button class="srow" id="s-trash"><span class="sl">ゴミ箱</span><span class="sv">${S.trash.length}件${I('chevr')}</span></button>
+ <button class="srow dgr" id="s-wipe"><span class="sl">すべてのデータを削除</span><span class="sv">${I('trash')}</span></button></div>
+ <div class="sec"><h2>HELP</h2>
+ <button class="srow" id="s-man"><span class="sl">取扱説明書</span><span class="sv">${I('book')}</span></button>
+ <button class="srow" id="s-gl"><span class="sl">用語集</span><span class="sv">${I('help')}</span></button>
+ <button class="srow" id="s-ob"><span class="sl">初回ガイドをもう一度見る</span><span class="sv">${I('chevr')}</span></button></div>
+ <div class="sec"><h2>LOG</h2>
+ <button class="srow" id="s-err"><span class="sl">エラーログ</span><span class="sv">${S.errors.length}件${unseenErr()?` <span class="dot" style="background:var(--dg)"></span>`:''}${I('chevr')}</span></button></div>
+ <div class="sec"><h2>ABOUT</h2>
+ <div class="srow"><span class="sl">バージョン</span><span class="sv mono">${esc(APP.version)}</span></div>
+ <button class="srow" id="s-upd"><span class="sl">更新を確認</span><span class="sv">${I('refresh')}</span></button>
+ <button class="srow" id="s-log"><span class="sl">更新履歴</span><span class="sv">${I('chevr')}</span></button></div>`;
+ $('#s-back').onclick=()=>go('home');
+ $$('#s-theme button').forEach(b=>b.onclick=e=>{setTheme(b.dataset.v,e.clientX,e.clientY)});
+ $$('.swc',v).forEach(b=>b.onclick=()=>{st.accent=b.dataset.c;dirty();applyTheme();renderSettings()});
+ $$('#s-font button').forEach(b=>b.onclick=()=>{st.font=+b.dataset.v;dirty();applyTheme();renderSettings()});
+ $$('#s-bk button').forEach(b=>b.onclick=()=>{st.backupDays=+b.dataset.v;dirty();renderSettings()});
+ $('#s-rm').onclick=()=>{st.reduceMotion=!st.reduceMotion;dirty();applyTheme();renderSettings()};
+ $('#s-bc').onclick=()=>{st.backConfirm=!st.backConfirm;dirty();renderSettings()};
+ $('#s-pin').onclick=()=>{if(st.pinOn)pinOff();else pinSetup()};
+ $('#s-exp').onclick=exportData;$('#s-imp').onclick=()=>$('#file').click();
+ $('#s-per').onclick=async()=>{const g=await requestPersist(true);persistLabel();toast(g?'保存領域は保護されています':'保護は許可されませんでした。アプリをインストールして使うと許可されやすくなります',{ms:4000})};persistLabel();
+ $('#s-trash').onclick=()=>go('trash');$('#s-wipe').onclick=wipeAll;$('#s-man').onclick=openManual;$('#s-gl').onclick=()=>glossary();$('#s-ob').onclick=()=>onboarding(true);$('#s-err').onclick=openErrors;$('#s-upd').onclick=checkUpdate;
+ $('#s-log').onclick=()=>sheet(`<div class="er"><div class="d">${esc(APP.version)} · trial-2</div><div class="m">テンプレートを6種類に再構成(Whyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-1</div><div class="m">試作版。ホーム・作業画面(アウトライン/ツリー)・ドリル・設定・ゴミ箱・AIに提出・書き出し/読み込み・PINロック・エラーログを実装。「記録」時に v1.0 として確定予定。</div></div>`,{title:'更新履歴'})}
+async function persistLabel(){const el=$('#s-per-s');if(!el)return;try{if(navigator.storage&&navigator.storage.persisted){const p=await navigator.storage.persisted();el.textContent=p?'保護済み(容量不足でも自動削除されにくい状態)':'未保護。タップで保護を申請します'}else el.textContent='このブラウザでは確認できません'}catch(_){el.textContent='確認できませんでした'}}
+async function requestPersist(force){try{if(!navigator.storage||!navigator.storage.persist)return false;if(await navigator.storage.persisted())return true;if(!force&&S.meta.persistAsked)return false;S.meta.persistAsked=true;return await navigator.storage.persist()}catch(_){return false}}
+function openErrors(){S.errors.forEach(e=>e.seen=true);dirty();const s=sheet(S.errors.length?S.errors.map(e=>`<div class="er"><div class="d">${fdate(e.t)} · ${esc(e.ctx)}</div><div class="m">${esc(e.msg)}</div>${e.stack?`<div class="s">${esc(e.stack)}</div>`:''}</div>`).join('')+`<div class="btns" style="margin-top:1rem"><button class="btn" id="er-copy">${I('copy')}内容をコピー</button><button class="btn dg" id="er-clr">${I('trash')}ログを消去</button></div>`:'<p style="color:var(--sub);font-size:.88rem">エラーは記録されていません。</p>',{title:'エラーログ',onClose:()=>{if(Nav.view==='home')renderHome(false);else if(Nav.view==='settings')renderSettings()}});
+ const c=$('#er-copy',s.el);if(c)c.onclick=()=>copyText(S.errors.map(e=>`${fdate(e.t)} [${e.ctx}] ${e.msg} ${e.stack}`).join('\n'),'エラーログをコピーしました');const r=$('#er-clr',s.el);if(r)r.onclick=()=>{S.errors=[];dirty();s.close();toast('エラーログを消去しました')}}
+function openManual(){const s=sheet('<iframe class="man" src="manual.html" title="取扱説明書"></iframe>',{title:'取扱説明書',full:true});s.body.style.padding='0';s.body.style.overflow='hidden'}
+function checkUpdate(){if(!swReg){toast('この環境では更新を確認できません(インストール版で利用できます)',{ms:3500});return}toast('更新を確認しています…');swReg.update().then(()=>{setTimeout(()=>{if(swReg.waiting)updToast(swReg);else if(!swReg.installing)toast('最新の状態です')},1200)}).catch(e=>logError(e,'更新確認'))}
+/* 書き出し・読み込み */
+function exportData(){const data={app:'logitore',schema:S.schema,exportedAt:new Date().toISOString(),version:APP.version,thoughts:S.thoughts,trash:S.trash,drill:S.drill};const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});const d=new Date();download(b,`logitore_backup_${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}.json`);S.meta.lastExport=Date.now();flush();toast('書き出しました(ダウンロードフォルダを確認してください)',{ms:3500});if(Nav.view==='settings')renderSettings();else if(Nav.view==='home')renderHome(false)}
+$('#file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;let inc;try{inc=JSON.parse(await f.text())}catch(err){toast('ファイルを読み込めませんでした(形式が違います)');logError(err,'読み込み');return}
+ if(!inc||inc.app!=='logitore'||!Array.isArray(inc.thoughts)||!inc.thoughts.every(t=>t&&t.id&&t.root)){toast('ロジトレの書き出しファイルではありません');return}
+ const mode=await dialog('読み込み方法を選んでください',`ファイル内: 思考 ${inc.thoughts.length}件\n\n統合: 今のデータを残し、新しいほうを採用します。\n上書き: 今の思考・ゴミ箱・ドリル記録をファイルの内容に置き換えます(設定は変わりません)。`,[{label:'キャンセル',v:0},{label:'上書き',v:'over',cls:'dg'},{label:'統合',v:'merge',cls:'pri'}]);if(!mode)return;
+ if(mode==='over'){const ok=await dialog('本当に上書きしますか?','今のデータは失われます。不安な場合は先に書き出してください。',[{label:'キャンセル',v:0},{label:'上書きする',v:1,cls:'dg'}]);if(!ok)return;S.thoughts=inc.thoughts;S.trash=Array.isArray(inc.trash)?inc.trash:[];if(inc.drill)S.drill=migrate({drill:inc.drill}).drill}
+ else{let add=0,upd=0;const by=new Map(S.thoughts.map(t=>[t.id,t]));for(const t of inc.thoughts){const cur=by.get(t.id);if(!cur){S.thoughts.push(t);add++}else if((t.updated||0)>(cur.updated||0)){Object.assign(cur,t);upd++}}const ids=new Set(S.thoughts.map(t=>t.id).concat(S.trash.map(t=>t.id)));for(const t of inc.trash||[])if(!ids.has(t.id))S.trash.push(t);if(inc.drill&&inc.drill.days)for(const [k,v] of Object.entries(inc.drill.days)){const c=S.drill.days[k];if(!c||v.n>c.n)S.drill.days[k]=v}toast(`統合しました(追加 ${add}件・更新 ${upd}件)`,{ms:3500})}
+ UNDO.clear();flush();if(mode==='over')toast('上書きしました');go('home',{force:true})});
+async function wipeAll(){const a=await dialog('すべてのデータを削除しますか?','思考・ゴミ箱・ドリル記録・設定がすべて消えます。書き出していないデータは復元できません。',[{label:'キャンセル',v:0},{label:'次へ',v:1,cls:'dg'}]);if(!a)return;const b=await dialog('最終確認','本当に削除してよろしいですか?',[{label:'やめる',v:0},{label:'すべて削除',v:1,cls:'dg'}]);if(!b)return;clearTimeout(saveT);saveT=null;try{localStorage.removeItem(APP.key)}catch(_){}S=null;location.reload()}
+
+/* ===== PINロック ===== */
+async function hash(s){try{if(crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('logitore:'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(_){}let h=0;for(const c of 'logitore:'+s)h=(h*31+c.charCodeAt(0))|0;return'w'+h}
+function keypad(title,sub,onDone,o={}){const w=document.createElement('div');w.className='full-ov pinv';w.innerHTML=`<h2>${esc(title)}</h2><p style="color:var(--sub);font-size:.8rem;margin:-.8rem 0 0;text-align:center;padding:0 2rem">${esc(sub||'')}</p><div class="pdots">${'<i></i>'.repeat(4)}</div><div class="kp">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')}<button class="fn" data-f="x">${o.cancel?'キャンセル':''}</button><button data-n="0">0</button><button class="fn" data-f="bs" aria-label="1文字消す">⌫</button></div>${o.forgot?'<button class="btn" id="pin-forgot" style="background:transparent;border:0;color:var(--sub);font-size:.78rem">PINを忘れた場合</button>':''}`;document.body.appendChild(w);let v='';const dots=$$('.pdots i',w);const draw=()=>dots.forEach((d,i)=>d.classList.toggle('f',i<v.length));
+ const api={el:w,close:()=>{w.style.opacity='0';setTimeout(()=>w.remove(),220);if(api.h){Back.close(api.h);api.h=null}},fail:()=>{v='';draw();shake($('.pdots',w))}};
+ if(o.cancel){api.h=Back.open(()=>{api.h=null;api.close()});api.h.closeUI=api.close}
+ $$('.kp button',w).forEach(b=>b.onclick=()=>{if(b.dataset.n!==undefined){if(v.length<4){v+=b.dataset.n;draw();if(v.length===4)setTimeout(()=>onDone(v,api),120)}}else if(b.dataset.f==='bs'){v=v.slice(0,-1);draw()}else if(b.dataset.f==='x'&&o.cancel)api.close()});
+ const fg=$('#pin-forgot',w);if(fg)fg.onclick=o.forgot;return api}
+let locked=false,hiddenAt=0;
+function lock(){if(locked||!S.settings.pinOn||!S.settings.pin)return;locked=true;keypad('PINを入力','',async(v,api)=>{if(await hash(v)===S.settings.pin){locked=false;api.close()}else api.fail()},{forgot:async()=>{const r=await dialog('PINを忘れた場合','PINは端末内にしか保存されていないため、復元できません。\nアプリを使い続けるには、すべてのデータを削除して初期化する必要があります(書き出したファイルがあれば、初期化後に読み込めます)。',[{label:'キャンセル',v:0},{label:'初期化する',v:1,cls:'dg'}]);if(r)wipeAll()}})}
+function pinSetup(){keypad('新しいPIN','4桁の数字を入力してください',(v1,a1)=>{a1.close();keypad('もう一度入力','確認のため同じPINを入力してください',async(v2,a2)=>{if(v1!==v2){a2.fail();toast('PINが一致しません。最初からやり直してください');setTimeout(()=>a2.close(),600);return}S.settings.pin=await hash(v1);S.settings.pinOn=true;flush();a2.close();toast('PINロックをオンにしました');renderSettings()},{cancel:true})},{cancel:true})}
+function pinOff(){keypad('現在のPIN','オフにするには現在のPINを入力してください',async(v,api)=>{if(await hash(v)===S.settings.pin){S.settings.pinOn=false;S.settings.pin=null;flush();api.close();toast('PINロックをオフにしました');renderSettings()}else api.fail()},{cancel:true})}
+
+/* ===== 初回ガイド ===== */
+function onboarding(again){const sl=[['01 / THINK','考えを「型」に流し込む','ロジックツリーやピラミッドなどの型を選び、課題を枝分かれさせて整理します。スマホではアウトライン、全体はツリーで確認できます。'],['02 / REVIEW','AIに提出して、穴を見つける','作った思考は、AIが読みやすい文章にワンタップで変換できます。Claudeなどに貼り付けて、論理の飛躍や根拠の弱さを指摘してもらいましょう。'],['03 / KEEP','データは、この端末の中に','思考は端末内に自動保存され、外部には送信されません。故障や機種変更に備えて、設定の「書き出し」で定期的にバックアップしてください。']];
+ const w=document.createElement('div');w.className='full-ov';w.innerHTML=`<div style="display:flex;justify-content:flex-end;padding:calc(1rem + env(safe-area-inset-top)) 1.25rem 0"><button class="btn" id="ob-skip" style="background:transparent;border:0;color:var(--sub)">スキップ</button></div><div class="slides" id="ob-s">${sl.map(([k,h,p])=>`<div class="slide"><div class="k">${k}</div><h2>${h}</h2><p>${p}</p></div>`).join('')}</div><div class="dots">${sl.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div><div class="obnav"><span class="mono" style="font-size:.7rem;color:var(--sub)">logitore</span><button class="btn ac" id="ob-next">次へ</button></div>`;document.body.appendChild(w);
+ const box=$('#ob-s',w);const idx=()=>Math.round(box.scrollLeft/box.clientWidth);const upd=()=>{const i=idx();$$('.dots i',w).forEach((d,j)=>d.classList.toggle('on',j===i));$('#ob-next',w).textContent=i===sl.length-1?'はじめる':'次へ'};box.addEventListener('scroll',()=>requestAnimationFrame(upd),{passive:true});
+ const fin=()=>{S.meta.onboarded=true;flush();w.style.opacity='0';setTimeout(()=>w.remove(),250);if(h){Back.close(h);h=null}requestPersist()};let h=again?Back.open(()=>{h=null;fin()}):null;
+ $('#ob-next',w).onclick=()=>{const i=idx();if(i>=sl.length-1)fin();else box.scrollTo({left:(i+1)*box.clientWidth,behavior:S.settings.reduceMotion?'auto':'smooth'})};$('#ob-skip',w).onclick=fin}
+
+/* ===== PWA(更新通知) ===== */
+let swReg=null;
+function updToast(reg){toast('新しいバージョンがあります',{ms:0,action:{label:'更新',fn:()=>{flush();reg.waiting&&reg.waiting.postMessage('skip')}}})}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').then(reg=>{swReg=reg;if(reg.waiting&&navigator.serviceWorker.controller)updToast(reg);reg.addEventListener('updatefound',()=>{const w=reg.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)updToast(reg)})})}).catch(()=>{});let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl)return;rl=true;location.reload()})}
+
+/* ===== キーボード・保存タイミング ===== */
+if(window.visualViewport){const vv=visualViewport;const f=()=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop));document.documentElement.style.setProperty('--kb',kb+'px')};vv.addEventListener('resize',f);vv.addEventListener('scroll',f)}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){flush();hiddenAt=Date.now()}else if(S&&S.settings.pinOn&&hiddenAt&&Date.now()-hiddenAt>60000)lock()});
+addEventListener('pagehide',()=>flush());
+addEventListener('resize',()=>{if(Nav.view==='editor'&&wide()&&ED.panel!=='closed')setPanel('closed')});
+
+/* ===== 起動 ===== */
+function boot(){Store.load();pendingErr.forEach(e=>logError(e,'起動'));pendingErr.length=0;
+ const cut=Date.now()-30*864e5;const before=S.trash.length;S.trash=S.trash.filter(t=>(t.deletedAt||0)>cut);if(S.trash.length!==before)dirty();
+ applyTheme();buildNodebar();
+ const p=new URLSearchParams(location.search);let shared=null;if(p.has('share')||p.has('text')||p.has('title')){const tx=(p.get('text')||'').trim(),ti=(p.get('title')||'').trim(),u=(p.get('url')||'').trim();if(tx||ti||u){shared=newThought('blank',{title:(ti||tx.split('\n')[0]||'共有から作成').slice(0,40),memo:[tx,u].filter(Boolean).join('\n')})}history.replaceState(null,'',location.pathname)}
+ const last=S.meta.last;Nav.view=null;
+ if(shared){go('home');go('editor',{id:shared.id});toast('共有された内容から新しい思考を作りました',{ms:3500})}
+ else if(last&&last.v==='editor'&&last.id&&getT(last.id)){go('home');go('editor',{id:last.id})}
+ else if(last&&['drill','settings','trash'].includes(last.v)){go('home');go(last.v)}
+ else go('home');
+ if(!S.meta.onboarded)onboarding(false);
+ if(S.settings.pinOn)lock();
+ if(!Store.ok)toast('この環境ではデータを保存できません。プライベートモードなどを確認してください',{ms:6000})}
+try{boot()}catch(e){document.body.insertAdjacentHTML('afterbegin',`<div style="padding:2rem;font-family:sans-serif">起動に失敗しました: ${esc(e.message)}<br><button onclick="location.reload()">再読み込み</button></div>`);logError(e,'起動')}
+</script>
+</body>
+</html>
