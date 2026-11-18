@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ロジトレ 設計仕様書</title>
+<!-- 設計仕様書 v1.0 -->
+<style>
+[data-theme=light]{--bg:#ECEEF2;--bg2:#FFFFFF;--bg3:#F3F4F7;--tx:#262A31;--sub:#6A717E;--ln:#E0E3E8;--ln2:#C8CDD5}
+[data-theme=dark]{--bg:#1A1C21;--bg2:#24272D;--bg3:#2D3038;--tx:#DDE0E6;--sub:#959BA7;--ln:#32363E;--ln2:#454A54}
+:root{--ac:#378ADD;--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.85;font-feature-settings:"palt"}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:var(--bg);border-bottom:.5px solid var(--ln)}
+.bar b{font-weight:500;font-size:.95rem}
+.bar .tag{font-family:var(--mono);font-size:.65rem;color:var(--sub);margin-left:auto}
+.tog{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--sub);padding:.35rem .6rem;border:.5px solid var(--ln2);border-radius:8px}
+.wrap{display:flex;max-width:1100px;margin:0 auto}
+nav{position:sticky;top:3.1rem;align-self:flex-start;width:250px;flex:none;max-height:calc(100dvh - 3.1rem);overflow:auto;padding:1rem .5rem 2rem 1rem;border-right:.5px solid var(--ln);transition:width .25s,padding .25s,opacity .2s}
+nav.min{width:0;padding:0;opacity:0;overflow:hidden;border:0}
+nav a{display:block;color:var(--sub);text-decoration:none;font-size:.82rem;padding:.35rem .6rem;border-radius:6px;line-height:1.5}
+nav a.l2{padding-left:1.4rem;font-size:.76rem}
+nav a:hover,nav a.on{color:var(--tx);background:var(--bg3)}
+main{flex:1;min-width:0;padding:1rem 1.5rem 5rem;max-width:760px}
+h1{font-size:1.6rem;font-weight:500;margin:1rem 0 .3rem}
+h2{font-size:1.15rem;font-weight:500;margin:2.6rem 0 .6rem;padding-top:.6rem;border-top:.5px solid var(--ln)}
+h3{font-size:.98rem;font-weight:500;margin:1.6rem 0 .4rem}
+p,li{font-size:.92rem}
+.sub{color:var(--sub)}
+.k{font-family:var(--mono);font-size:.7rem;color:var(--ac);letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.6rem 0}
+th,td{border-bottom:.5px solid var(--ln);padding:.5rem .4rem;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--sub);font-size:.78rem}
+kbd{font-family:var(--mono);font-size:.75rem;border:.5px solid var(--ln2);border-radius:4px;padding:0 .3rem;background:var(--bg3)}
+.note{border-left:2px solid var(--ac);padding:.2rem 0 .2rem .9rem;margin:1rem 0;color:var(--sub);font-size:.88rem}
+.warn{border-left:2px solid #E5534B;padding:.2rem 0 .2rem .9rem;margin:1rem 0;font-size:.88rem}
+@media(max-width:760px){nav{position:fixed;top:3.1rem;left:0;bottom:0;z-index:9;background:var(--bg2);width:78vw;max-height:none;box-shadow:none;border-right:.5px solid var(--ln2)}nav.min{width:0}main{padding:1rem 1.15rem 5rem}}
+pre{font-family:var(--mono);font-size:.74rem;background:var(--bg3);border-radius:8px;padding:.8rem;overflow:auto;line-height:1.6}
+code{font-family:var(--mono);font-size:.8em}
+.tw{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="bar"><button class="tog" id="tog" aria-expanded="true" aria-controls="toc">☰ 目次</button><b>ロジトレ 設計仕様書</b><span class="tag">v1.0</span></div>
+<div class="wrap">
+<nav id="toc" aria-label="目次">
+<a href="#overview">1. 概要</a>
+<a href="#policy">2. 前提と方針</a>
+<a href="#files">3. ファイル構成</a>
+<a href="#code">4. index.html の構成</a>
+<a href="#data">5. データ形式</a>
+<a href="#screens">6. 画面と機能</a>
+<a href="#templates" class="l2">6-1. テンプレート</a>
+<a href="#editor" class="l2">6-2. 作業画面</a>
+<a href="#drill" class="l2">6-3. ドリル</a>
+<a href="#back">7. 戻る操作</a>
+<a href="#look">8. 見た目(デザイン)</a>
+<a href="#pwa">9. PWA・更新・公開</a>
+<a href="#test">10. テスト</a>
+<a href="#release">11. 開発と記録の手順</a>
+<a href="#todo">12. 未実装・既知の制限</a>
+<a href="#history">13. 更新履歴</a>
+</nav>
+<main>
+<h1>ロジトレ 設計仕様書</h1>
+<p class="sub">v1.0 時点の設計をまとめたもの。開発を引き継ぐ人(Claude Code を含む)向け。利用者向けの説明は取扱説明書(<code>manual.html</code>)を参照。</p>
+
+<h2 id="overview">1. 概要</h2>
+<p>ロジカルシンキングの「思考ノート」と「ドリル」を1つにした PWA(ブラウザで動き、インストールしてアプリのように使える Web アプリ)。</p>
+<ul><li>利用者:本人1人。ログインなし</li><li>端末:Android スマホと PC(Chrome / Edge)</li><li>公開先:GitHub Pages <code>https://tmgalaxy330-byte.github.io/PWA-app/</code>(公開リポジトリの <code>main</code> 直下を配信)</li></ul>
+
+<h2 id="policy">2. 前提と方針</h2>
+<ul>
+<li><b>データは端末内だけ</b>:localStorage(ブラウザ内の保存領域)に保存し、サーバーには送らない。端末間の移動は「書き出し/読み込み」(JSON ファイル)。</li>
+<li><b>ビルド不要</b>:HTML/CSS/JS を <code>index.html</code> 1ファイルにまとめる。外部ライブラリ・外部通信なし。</li>
+<li><b>オフライン対応</b>:Service Worker がファイルをキャッシュし、電波がなくても動く。</li>
+<li><b>日本語入力</b>:Enter の判定では <code>e.isComposing</code> と <code>keyCode===229</code> を必ず除外する(変換確定の Enter を誤検知しないため)。</li>
+<li><b>保存</b>:モバイルでは終了イベントが来ないことがあるため、入力後の自動保存と <code>visibilitychange</code>(画面が隠れたとき)で保存する。</li>
+</ul>
+
+<h2 id="files">3. ファイル構成</h2>
+<div class="tw"><table><tr><th>ファイル</th><th>役割</th></tr>
+<tr><td><code>index.html</code></td><td>アプリ本体</td></tr>
+<tr><td><code>manual.html</code></td><td>取扱説明書。アプリのメニュー・設定から iframe で開く</td></tr>
+<tr><td><code>sw.js</code></td><td>Service Worker。リリースのたびに <code>CACHE</code> 名を変える</td></tr>
+<tr><td><code>manifest.webmanifest</code></td><td>PWA 設定(名前・アイコン・色・共有ターゲット)</td></tr>
+<tr><td><code>icons/</code></td><td>アプリアイコン(192 / 512 / maskable 512)</td></tr>
+<tr><td><code>tests/</code></td><td>Playwright(ブラウザ自動操作)によるテスト。<code>bash tests/run.sh</code></td></tr>
+<tr><td><code>docs/spec.html</code></td><td>この設計仕様書</td></tr>
+<tr><td><code>docs/handoff/</code></td><td>引き継ぎファイル。版ごとに追加し、過去分は上書きしない</td></tr>
+<tr><td><code>CLAUDE.md</code></td><td>Claude Code 向けの作業ルール</td></tr>
+<tr><td><code>.nojekyll</code></td><td>GitHub Pages でファイルをそのまま配信させるための目印</td></tr>
+</table></div>
+
+<h2 id="code">4. index.html の構成</h2>
+<p>スクリプトは <code>/* ===== 見出し ===== */</code> で区切っている。主な部品:</p>
+<ul>
+<li><code>APP</code>:名前・版(<code>version</code>)・保存キー(<code>logitore.v1</code>)</li>
+<li><code>Store</code> / <code>migrate()</code>:読み込み・保存・旧データの移行</li>
+<li>エラーログ、演出(リップル・シェイク・紙吹雪)、トースト(画面下の短いお知らせ)</li>
+<li><code>Back</code>(シート等の重なりを閉じる)と <code>Nav</code>(画面の移動)</li>
+<li>オーバーレイ部品:<code>sheet()</code> <code>dialog()</code> <code>menu()</code></li>
+<li>テーマ、テンプレート(<code>TPL</code> <code>USAGE</code> <code>SAMPLE</code> <code>DIAG</code>)、用語集(<code>GLOSS</code>)</li>
+<li>画面:<code>renderHome</code> / <code>renderEditor</code> / ドリル(<code>Q</code> 20問)/ ゴミ箱 / 設定</li>
+<li>書き出し・読み込み、PIN ロック、初回ガイド、更新通知、起動(<code>boot</code>)</li>
+</ul>
+
+<h2 id="data">5. データ形式</h2>
+<pre>S = { schema, thoughts[], trash[], settings{}, drill{}, errors[], meta{} }
+
+思考  { id, title, template, status(draft|wip|done), pinned, created, updated,
+        root(ノードの木), memo, mece{a,b,c}, reviews[] }
+ノード { id, text, children[], label, ph, collapsed }</pre>
+<ul>
+<li>保存キー:<code>localStorage["logitore.v1"]</code></li>
+<li>形式を変えるときは <code>migrate()</code> に移行処理を書き、既存データを壊さない(例:旧 <code>tree</code> テンプレートは <code>why</code> に自動移行)</li>
+<li>書き出しファイル:<code>logitore_backup_YYYYMMDD_HHMM.json</code>(thoughts / trash / drill を含む)。読み込みは「統合」と「上書き」を選べる</li>
+<li>ゴミ箱は30日で自動削除。何も入力せずに離れた思考は自動削除</li>
+</ul>
+
+<h2 id="screens">6. 画面と機能</h2>
+<h3>ホーム</h3>
+<ul><li>思考の一覧(番号・タイトル・状態・型・更新日)、絞り込み(すべて/下書き/検討中/完了)、並び替え、ピン留め、全文検索</li>
+<li>スワイプで複製/削除(画面の端28pxから始めた操作は無視)、長押しメニュー</li>
+<li>お知らせ行(前回までのエラー件数・書き出しの催促)、今日のドリルの進み具合、＋で新規作成</li></ul>
+<h3 id="templates">6-1. テンプレート(6種類)</h3>
+<div class="tw"><table><tr><th>キー</th><th>名前</th><th>構成</th></tr>
+<tr><td>why</td><td>Whyツリー</td><td>問題 → 原因 → 深い原因</td></tr>
+<tr><td>how</td><td>Howツリー</td><td>目的 → 手段 → 具体策</td></tr>
+<tr><td>pyramid</td><td>ピラミッド</td><td>結論 → 理由 → 根拠</td></tr>
+<tr><td>sky</td><td>空・雨・傘</td><td>テーマ → 空(事実)/雨(解釈)/傘(行動)</td></tr>
+<tr><td>pros</td><td>メリデメ比較</td><td>比較テーマ → 選択肢(2つ以上)→ メリット/デメリット → 内容</td></tr>
+<tr><td>blank</td><td>白紙</td><td>テーマ → 項目</td></tr></table></div>
+<p>各テンプレートに使い方(目的/手順/記入例/よくある失敗/次にやること)、ビジネス向けサンプル(架空の数値と明示)、「迷ったら診断」(1〜2問で型をすすめる)。</p>
+<h3 id="editor">6-2. 作業画面</h3>
+<ul><li>アウトライン表示(編集用)とツリー表示(全体確認・拡大縮小)</li>
+<li>操作バー:下に追加・同階層・右へ・左へ・上へ・下へ・削除。⋮⋮ でメニュー/ドラッグ並べ替え</li>
+<li>キーボード:<kbd>Enter</kbd> <kbd>Tab</kbd> <kbd>Shift+Tab</kbd> <kbd>Alt+↑↓</kbd> <kbd>Ctrl+Z</kbd> <kbd>Ctrl+Y</kbd></li>
+<li>元に戻す/やり直す(アプリを閉じると履歴は消える)、自動保存と保存状態の表示</li>
+<li>プロパティパネル(スマホは下からのシート、PC は右側で折りたたみ可):状態、MECE チェック+自動チェック、メモ、AI レビュー履歴、情報</li>
+<li>AI に提出:依頼文(厳しめ/やさしめ/MECE 確認/反論)+ Markdown をコピー・共有。返答を貼り付けて保存</li>
+<li>集中モード、画像(PNG)書き出し</li></ul>
+<h3 id="drill">6-3. ドリル</h3>
+<ul><li>1日5問(日付で出題を固定)、途中から再開、不正解でシェイク、3問以上正解で紙吹雪</li>
+<li>連続日数、正答率、直近14日のグラフ、「もっと練習する」</li></ul>
+<h3>その他</h3>
+<ul><li>ゴミ箱、PIN ロック(起動時と1分以上離れたとき)、エラーログ(次回起動時にお知らせ)</li>
+<li>初回ガイド3枚、用語集、取扱説明書、更新通知、共有ターゲット(他アプリからの共有で新規作成)</li></ul>
+
+<h2 id="back">7. 戻る操作</h2>
+<div class="tw"><table><tr><th>状態</th><th>戻る</th></tr>
+<tr><td>シート・メニュー・確認画面</td><td>閉じるだけ</td></tr>
+<tr><td>作業画面</td><td>1回目は「もう一度でホームへ」、3秒以内の2回目で戻る</td></tr>
+<tr><td>ドリル・設定・ゴミ箱</td><td>ホームへ</td></tr>
+<tr><td>ホーム</td><td>1回目は「もう一度で終了」、2回目で終了</td></tr></table></div>
+<p>設定でオフにできる。Android は CloseWatcher、それ以外は History API を使う。自動テストでは Esc キーで代用しており、実機での確認が必要。</p>
+
+<h2 id="look">8. 見た目(デザイン)</h2>
+<ul><li>基本は落ち着いたグレーの背景+白(ダークでは濃いグレー)のカード、アクセント1色(青・緑・橙から選択)</li>
+<li>番号・型名・日時は等幅フォント</li>
+<li>テーマ:ライト/ダーク/端末に合わせる。文字サイズ4段階、動きを減らす</li></ul>
+<div class="tw"><table><tr><th>色の名前</th><th>用途</th><th>ライト</th><th>ダーク</th></tr>
+<tr><td><code>--bg</code></td><td>背景</td><td>#ECEEF2</td><td>#1A1C21</td></tr>
+<tr><td><code>--bg2</code></td><td>カード・上部バー</td><td>#FFFFFF</td><td>#24272D</td></tr>
+<tr><td><code>--bg3</code></td><td>押したとき・入力中</td><td>#F3F4F7</td><td>#2D3038</td></tr>
+<tr><td><code>--tx</code></td><td>文字</td><td>#262A31</td><td>#DDE0E6</td></tr>
+<tr><td><code>--sub</code></td><td>補足の文字</td><td>#6A717E</td><td>#959BA7</td></tr>
+<tr><td><code>--ln</code> / <code>--ln2</code></td><td>線・枠</td><td>#E0E3E8 / #C8CDD5</td><td>#32363E / #454A54</td></tr></table></div>
+<ul><li>枠:角丸10px・線1px。上部バーは画面幅いっぱいの背景+下線</li>
+<li>PC の表示幅は最大900px(作業画面は1240px)</li>
+<li><code>theme-color</code>(インストール時のタイトルバー色)は上部バーと同じ色</li></ul>
+
+<h2 id="pwa">9. PWA・更新・公開</h2>
+<ul><li>Service Worker はキャッシュ優先(キャッシュにあればそれを使い、なければネットから取得)</li>
+<li><b>更新の届き方</b>:<code>sw.js</code> の <code>CACHE</code> 名が変わると、端末が新しい版を検知してアプリに「更新があります」を出す。<code>CACHE</code> 名を変えないと更新が届かない</li>
+<li>インストールできるのは <code>https://</code>(または <code>localhost</code>)から開いた場合だけ。<code>file://</code>(ファイルを直接開く)ではインストールできない</li>
+<li>公開:GitHub Pages(Source = <code>main</code> / root)。<code>main</code> に取り込むと数十秒〜数分で自動公開される</li>
+<li>公開されるのはプログラムだけで、利用者のデータは含まれない。なお、データはサイトのアドレスごとに分かれて保存されるので、アドレスが変わると「書き出し→読み込み」が必要</li></ul>
+
+<h2 id="test">10. テスト</h2>
+<ul><li><code>bash tests/run.sh</code>:簡易サーバーを起動して3種類のテストを実行(スマホ表示・PC 表示・テンプレート)</li>
+<li>必要なもの:Python 版 Playwright(<code>pip install playwright</code>)と Chromium。既存の Chrome を使う場合は <code>CHROME_PATH</code> で場所を指定</li>
+<li>出力の <code>errors 1</code> はエラーログ機能の確認のために意図的に起こしたもの。合否は最後の <code>ALL TESTS PASSED</code> とコンソールエラー一覧(<code>ERRORS: []</code>)で判断する</li></ul>
+
+<h2 id="release">11. 開発と記録の手順</h2>
+<ul><li>実装はユーザーが「実行」と言ってから。見た目の変更は先に試作(モック)を見せて確認を取る</li>
+<li>「記録」前の実装は「試作(trial-N)」。「記録」で正式な版を付ける(通常の追加・修正はマイナー v1.0→v1.1、大きな変更はメジャー v2.0)</li>
+<li>記録のときにやること:<code>APP.version</code> と <code>CACHE</code> 名を更新 → 取扱説明書とこの仕様書の更新履歴に追記 → <code>docs/handoff/handoff_vX.Y.md</code> を新規作成 → <code>main</code> に取り込み、<code>vX.Y</code> のタグを付ける</li>
+<li>作業はブランチで行い、PR を作ってから <code>main</code> に取り込む</li></ul>
+
+<h2 id="todo">12. 未実装・既知の制限</h2>
+<h3>次に実装する:複数タブの自動読み直し(採用済み)</h3>
+<ul><li>背景:PC で2つのタブを開くと、後から保存したタブの内容で上書きされる</li>
+<li>仕様:<code>storage</code> イベントで別タブの変更を検知 → 未保存の変更があれば先に保存 → <code>S</code> を読み直して画面を描き直す → トーストで知らせる。開いていた思考が消えていたらホームへ戻る</li>
+<li>受け入れ条件:タブAで追加した思考がタブBに数秒以内に表示される/タブBで編集して閉じてもタブAの思考が消えない/既存テストがすべて成功</li></ul>
+<h3>既知の制限</h3>
+<ul><li>Android の戻るボタンは実機で未確認</li>
+<li>会社の PC など、管理者の設定によってはインストールの表示が出ない場合がある</li></ul>
+
+<h2 id="history">13. 更新履歴</h2>
+<div class="tw"><table><tr><th>版</th><th>内容</th></tr>
+<tr><td>v1.0</td><td>最初の正式版。試作 trial-1〜3 の内容を確定し、この設計仕様書を作成。公開先を GitHub Pages に決定</td></tr>
+<tr><td>試作 trial-3</td><td>見た目を調整(色調をやわらげる、余白を詰める、カード状の枠)</td></tr>
+<tr><td>試作 trial-2</td><td>テンプレートを6種類に再構成。使い方・サンプル・迷ったら診断を追加</td></tr>
+<tr><td>試作 trial-1</td><td>最初の試作。ホーム・作業画面・ドリル・設定・ゴミ箱・AI に提出・書き出し/読み込み・PIN ロック・エラーログ</td></tr></table></div>
+</main>
+</div>
+<script>
+try{const s=JSON.parse(localStorage.getItem('logitore.v1')||'{}').settings||{};const t=s.theme==='system'||!s.theme?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):s.theme;document.documentElement.dataset.theme=s.theme?t:'dark';if(s.accent)document.documentElement.style.setProperty('--ac',s.accent);if(s.font)document.documentElement.style.fontSize=(s.font*100)+'%'}catch(e){}
+const toc=document.getElementById('toc'),tog=document.getElementById('tog');
+const small=()=>innerWidth<=760;
+if(small())toc.classList.add('min');
+const upd=()=>tog.setAttribute('aria-expanded',!toc.classList.contains('min'));upd();
+tog.onclick=()=>{toc.classList.toggle('min');upd()};
+toc.addEventListener('click',e=>{if(e.target.tagName==='A'&&small()){toc.classList.add('min');upd()}});
+const links=[...toc.querySelectorAll('a')];const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+en.target.id))}})},{rootMargin:'-20% 0px -70% 0px'});secs.forEach(s=>s&&io.observe(s));
+</script>
+</body>
+</html>

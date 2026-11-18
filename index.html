@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<!-- ロジトレ 試作版(検討中・ver未確定) -->
+<!-- ロジトレ v1.0 -->
 <style>
 :root{--ac:#378ADD;--kb:0px;--r:8px;--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;--ease:cubic-bezier(.2,.7,.2,1);--spring:cubic-bezier(.34,1.4,.64,1)}
 [data-theme=light]{--bg:#ECEEF2;--bg2:#FFFFFF;--bg3:#F3F4F7;--tx:#262A31;--sub:#6A717E;--ln:#E0E3E8;--ln2:#C8CDD5;--inv:#FFFFFF;--dg:#C73B3A;--scrim:rgba(20,24,32,.35);color-scheme:light}
@@ -361,7 +361,7 @@ html,body{overflow-x:clip}
 <script>
 'use strict';
 /* ===== 基本情報 ===== */
-const APP={name:'ロジトレ',version:'検討中(ver未確定)',build:'trial-3',key:'logitore.v1'};
+const APP={name:'ロジトレ',version:'v1.0',build:'v1.0',key:'logitore.v1'};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -775,7 +775,7 @@ function renderSettings(){const v=$('#v-settings'),st=S.settings;const seg=(id,o
  $('#s-exp').onclick=exportData;$('#s-imp').onclick=()=>$('#file').click();
  $('#s-per').onclick=async()=>{const g=await requestPersist(true);persistLabel();toast(g?'保存領域は保護されています':'保護は許可されませんでした。アプリをインストールして使うと許可されやすくなります',{ms:4000})};persistLabel();
  $('#s-trash').onclick=()=>go('trash');$('#s-wipe').onclick=wipeAll;$('#s-man').onclick=openManual;$('#s-gl').onclick=()=>glossary();$('#s-ob').onclick=()=>onboarding(true);$('#s-err').onclick=openErrors;$('#s-upd').onclick=checkUpdate;
- $('#s-log').onclick=()=>sheet(`<div class="er"><div class="d">${esc(APP.version)} · trial-3</div><div class="m">見た目を調整。ライト/ダークの色調をやわらげ、余白を詰め、一覧・作業エリア・パネル・設定などを枠(カード)で囲んで見やすくした。PCでの表示幅を広げた。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-2</div><div class="m">テンプレートを6種類に再構成(Whyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-1</div><div class="m">試作版。ホーム・作業画面(アウトライン/ツリー)・ドリル・設定・ゴミ箱・AIに提出・書き出し/読み込み・PINロック・エラーログを実装。「記録」時に v1.0 として確定予定。</div></div>`,{title:'更新履歴'})}
+ $('#s-log').onclick=()=>sheet(`<div class="er"><div class="d">v1.0</div><div class="m">最初の正式版。試作 trial-1〜3 の内容を確定。公開先を GitHub Pages に決定。</div></div><div class="er"><div class="d">試作 · trial-3</div><div class="m">見た目を調整。ライト/ダークの色調をやわらげ、余白を詰め、一覧・作業エリア・パネル・設定などを枠(カード)で囲んで見やすくした。PCでの表示幅を広げた。</div></div><div class="er"><div class="d">試作 · trial-2</div><div class="m">テンプレートを6種類に再構成(Whyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</div></div><div class="er"><div class="d">試作 · trial-1</div><div class="m">試作版。ホーム・作業画面(アウトライン/ツリー)・ドリル・設定・ゴミ箱・AIに提出・書き出し/読み込み・PINロック・エラーログを実装。「記録」時に v1.0 として確定予定。</div></div>`,{title:'更新履歴'})}
 async function persistLabel(){const el=$('#s-per-s');if(!el)return;try{if(navigator.storage&&navigator.storage.persisted){const p=await navigator.storage.persisted();el.textContent=p?'保護済み(容量不足でも自動削除されにくい状態)':'未保護。タップで保護を申請します'}else el.textContent='このブラウザでは確認できません'}catch(_){el.textContent='確認できませんでした'}}
 async function requestPersist(force){try{if(!navigator.storage||!navigator.storage.persist)return false;if(await navigator.storage.persisted())return true;if(!force&&S.meta.persistAsked)return false;S.meta.persistAsked=true;return await navigator.storage.persist()}catch(_){return false}}
 function openErrors(){S.errors.forEach(e=>e.seen=true);dirty();const s=sheet(S.errors.length?S.errors.map(e=>`<div class="er"><div class="d">${fdate(e.t)} · ${esc(e.ctx)}</div><div class="m">${esc(e.msg)}</div>${e.stack?`<div class="s">${esc(e.stack)}</div>`:''}</div>`).join('')+`<div class="btns" style="margin-top:1rem"><button class="btn" id="er-copy">${I('copy')}内容をコピー</button><button class="btn dg" id="er-clr">${I('trash')}ログを消去</button></div>`:'<p style="color:var(--sub);font-size:.88rem">エラーは記録されていません。</p>',{title:'エラーログ',onClose:()=>{if(Nav.view==='home')renderHome(false);else if(Nav.view==='settings')renderSettings()}});

@@ -27,6 +27,9 @@
 - `main` = 公開している版。作業はブランチ(例:`feature/multi-tab-sync`)で行い、PR を作ってからマージする。
 - コミットメッセージは日本語で、何を変えたかが分かるように書く。
 
+## 公開先
+- GitHub Pages:https://tmgalaxy330-byte.github.io/PWA-app/(公開リポジトリの `main` 直下。`main` に取り込むと自動で公開される)
+
 ## ファイル構成
 | ファイル | 役割 |
 |---|---|
@@ -36,6 +39,7 @@
 | `manifest.webmanifest` | PWA 設定(アイコン・共有ターゲット) |
 | `icons/` | アプリアイコン |
 | `tests/` | Playwright による自動テスト(`bash tests/run.sh`) |
+| `docs/spec.html` | 設計仕様書(記録のたびに更新履歴を追記) |
 | `docs/handoff/` | 引き継ぎファイル(版ごとに追加) |
 
 ## index.html の中身(`/* ===== 見出し ===== */` で区切っている)
