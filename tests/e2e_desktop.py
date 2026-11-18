@@ -1,0 +1,53 @@
+import asyncio, json, os, sys
+from playwright.async_api import async_playwright
+BASE=os.environ.get('LOGITORE_URL','http://localhost:8765')
+URL=BASE+'/index.html'
+OUT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'out'); os.makedirs(OUT,exist_ok=True)
+CHROME=os.environ.get('CHROME_PATH')
+def launch_args(): return dict(executable_path=CHROME,args=['--no-sandbox']) if CHROME else dict(args=['--no-sandbox'])
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch(**launch_args())
+        ctx=await b.new_context(viewport={'width':1280,'height':800}); pg=await ctx.new_page()
+        errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
+        pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
+        await pg.goto(URL); await pg.wait_for_timeout(500)
+        print('mode',await pg.evaluate('Nav.mode'))
+        await pg.click('#ob-skip'); await pg.wait_for_timeout(300)
+        await pg.click('#h-fab'); await pg.wait_for_timeout(500); await pg.click('[data-k=sky]'); await pg.wait_for_timeout(800)
+        await pg.keyboard.type('来月の売上見通し'); await pg.keyboard.press('ArrowDown'); await pg.keyboard.type('問い合わせが前月比30%減')
+        await pg.wait_for_timeout(300)
+        await pg.screenshot(path=OUT+'/pc_editor.png')
+        await pg.click('#e-panel'); await pg.wait_for_timeout(300)
+        print('panel collapsed', await pg.evaluate("document.querySelector('#ed-wrap').classList.contains('pcc')"))
+        await pg.click('#e-panel'); await pg.wait_for_timeout(300)
+        # browser back -> home
+        await pg.go_back(); await pg.wait_for_timeout(500)
+        print('after browser back', await pg.evaluate('Nav.view'))
+        await pg.screenshot(path=OUT+'/pc_home.png')
+        # PIN setup
+        await pg.evaluate("go('settings')"); await pg.wait_for_timeout(300)
+        await pg.click('#s-pin'); await pg.wait_for_timeout(300)
+        for k in '1234': await pg.click(f'.full-ov [data-n="{k}"]'); await pg.wait_for_timeout(60)
+        await pg.wait_for_timeout(400)
+        for k in '1234': await pg.click(f'.full-ov [data-n="{k}"]'); await pg.wait_for_timeout(60)
+        await pg.wait_for_timeout(800)
+        print('pinOn', await pg.evaluate('S.settings.pinOn'), 'overlays', await pg.evaluate("document.querySelectorAll('.full-ov').length"))
+        await pg.reload(); await pg.wait_for_timeout(800)
+        print('locked', await pg.evaluate('locked'))
+        await pg.screenshot(path=OUT+'/pc_lock.png')
+        for k in '9999': await pg.click(f'.full-ov [data-n="{k}"]'); await pg.wait_for_timeout(60)
+        await pg.wait_for_timeout(500); print('still locked after wrong', await pg.evaluate('locked'))
+        for k in '1234': await pg.click(f'.full-ov [data-n="{k}"]'); await pg.wait_for_timeout(60)
+        await pg.wait_for_timeout(600); print('unlocked', not await pg.evaluate('locked'), 'view', await pg.evaluate('Nav.view'))
+        # share target
+        await pg.goto(URL+'?share=1&title=%E5%85%B1%E6%9C%89%E3%83%86%E3%82%B9%E3%83%88&text=hello'); await pg.wait_for_timeout(800)
+        for k in '1234': await pg.click(f'.full-ov [data-n="{k}"]'); await pg.wait_for_timeout(60)
+        await pg.wait_for_timeout(500)
+        print('share ->', await pg.evaluate('Nav.view'), await pg.evaluate('T()&&T().title'), await pg.evaluate('location.search'))
+        # sw registered?
+        print('sw', await pg.evaluate("navigator.serviceWorker.getRegistration().then(r=>!!r)"))
+        print('errors',errs)
+        if errs: sys.exit(1)
+        await b.close()
+asyncio.run(main())
