@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<meta name="theme-color" content="#0E0E0D">
+<meta name="theme-color" content="#24272D">
 <meta name="description" content="ロジカルシンキングの思考ノートとドリル">
 <title>ロジトレ</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -12,8 +12,8 @@
 <!-- ロジトレ 試作版(検討中・ver未確定) -->
 <style>
 :root{--ac:#378ADD;--kb:0px;--r:8px;--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;--ease:cubic-bezier(.2,.7,.2,1);--spring:cubic-bezier(.34,1.4,.64,1)}
-[data-theme=light]{--bg:#FAFAF9;--bg2:#FFFFFF;--bg3:#F1F0EC;--tx:#111110;--sub:#6B6A65;--ln:#E6E5E1;--ln2:#D3D1C7;--inv:#FFFFFF;--dg:#C73B3A;--scrim:rgba(0,0,0,.35);color-scheme:light}
-[data-theme=dark]{--bg:#0E0E0D;--bg2:#171716;--bg3:#1F1F1D;--tx:#EDEDEA;--sub:#8F8E88;--ln:#262624;--ln2:#3A3A36;--inv:#0E0E0D;--dg:#E5534B;--scrim:rgba(0,0,0,.6);color-scheme:dark}
+[data-theme=light]{--bg:#ECEEF2;--bg2:#FFFFFF;--bg3:#F3F4F7;--tx:#262A31;--sub:#6A717E;--ln:#E0E3E8;--ln2:#C8CDD5;--inv:#FFFFFF;--dg:#C73B3A;--scrim:rgba(20,24,32,.35);color-scheme:light}
+[data-theme=dark]{--bg:#1A1C21;--bg2:#24272D;--bg3:#2D3038;--tx:#DDE0E6;--sub:#959BA7;--ln:#32363E;--ln2:#454A54;--inv:#1A1C21;--dg:#E5534B;--scrim:rgba(0,0,0,.55);color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",sans-serif;font-feature-settings:"palt";overscroll-behavior-y:contain}
 body{min-height:100dvh;line-height:1.6}
@@ -304,6 +304,45 @@ pre.md{white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-s
 .dres p{margin:0;font-size:.86rem;color:var(--sub);line-height:1.7}
 iframe.man{width:100%;height:100%;border:0;display:block;background:var(--bg)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* ===== 見た目:枠(カード)・余白の調整(trial-3) ===== */
+html,body{overflow-x:clip}
+.view{max-width:900px}
+.top{background:transparent;padding-top:calc(.3rem + env(safe-area-inset-top));padding-bottom:.3rem}
+.top::before{content:'';position:absolute;top:0;bottom:0;left:-100vmax;right:-100vmax;background:var(--bg2);border-bottom:1px solid var(--ln);box-shadow:0 1px 3px rgba(0,0,0,.05);z-index:-1}
+@media(min-width:800px){.fab{right:calc(50% - 450px + 1rem)}}
+.hero{padding:.8rem 1rem .1rem}.hero h1{font-size:1.45rem}
+.notice{width:calc(100% - 2rem);margin:.5rem 1rem 0;padding:.55rem .8rem;border:1px solid var(--ln);border-radius:10px;background:var(--bg2)}
+.dcard{width:calc(100% - 2rem);margin:.5rem 1rem 0;padding:.7rem .9rem;border:1px solid var(--ln);border-radius:10px;background:var(--bg2)}
+.tabs{padding:.5rem 1rem 0;gap:.3rem;flex-wrap:wrap}
+.tab{padding:.3rem .8rem;border:1px solid var(--ln);border-radius:999px;background:var(--bg2);font-size:.8rem}
+.tab.on{background:var(--tx);color:var(--inv);border-color:var(--tx)}
+.subrow{border-top:0;padding:.5rem 1rem .3rem}
+.srch{padding:.1rem 1rem .5rem}
+.list{margin:0 1rem;padding:0;background:var(--bg2);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.row{border-bottom:1px solid var(--ln)}.row:last-child{border-bottom:0}
+.sw-c{background:var(--bg2);padding:.65rem .9rem;gap:.7rem}
+@media(hover:hover){.sw-c:hover{background:var(--bg3)}}
+.empty{padding:1.5rem 1rem}
+.btn,.inp,.segc,.seg{border-width:1px}
+.lb{border-width:1px}
+.ed-head{margin:.75rem 1rem 0;padding:.5rem .9rem 0;background:var(--bg2);border:1px solid var(--ln);border-bottom:0;border-radius:10px 10px 0 0}
+.ed-title{font-size:1.3rem}
+.ed-meta{padding:.1rem 0 .55rem;border-bottom:1px solid var(--ln)}
+.outline,.treewrap{margin:0 1rem 1rem;background:var(--bg2);border:1px solid var(--ln);border-top:0;border-radius:0 0 10px 10px}
+.outline{padding:.4rem .6rem .6rem}
+.zoom{margin:0 1rem;padding:.5rem .9rem 0;background:var(--bg2);border-left:1px solid var(--ln);border-right:1px solid var(--ln)}
+.v-editor-focus .ed-head{border-bottom:0}
+.pbody{padding:0 .9rem 1.5rem}
+.psec{background:var(--bg2);border:1px solid var(--ln);border-radius:10px;padding:.7rem .85rem;margin-bottom:.6rem}
+@media(min-width:900px){.panel{top:3.1rem;height:calc(100dvh - 3.1rem);border-left:1px solid var(--ln);padding-top:.75rem;background:var(--bg)}}
+.sec{padding:0 1rem}
+.sec h2{margin:1.1rem 0 .4rem}
+.srow{padding:.55rem .9rem;min-height:2.8rem;background:var(--bg2);border:1px solid var(--ln);border-top:0}
+.sec h2+.srow{border-top:1px solid var(--ln);border-top-left-radius:10px;border-top-right-radius:10px}
+.srow:has(+h2),.srow:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.dq{padding:.8rem 1rem}
+#v-drill .segs{margin:.6rem 1rem 0!important}
+#d-card .qt{background:var(--bg2);border:1px solid var(--ln);border-radius:10px;padding:.8rem 1rem;margin:.6rem 0 .9rem}
 </style>
 </head>
 <body>
@@ -322,7 +361,7 @@ iframe.man{width:100%;height:100%;border:0;display:block;background:var(--bg)}
 <script>
 'use strict';
 /* ===== 基本情報 ===== */
-const APP={name:'ロジトレ',version:'検討中(ver未確定)',build:'trial-2',key:'logitore.v1'};
+const APP={name:'ロジトレ',version:'検討中(ver未確定)',build:'trial-3',key:'logitore.v1'};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -402,7 +441,7 @@ function menu(x,y,items){const w=overlay(`<div class="menu" role="menu">${items.
 
 /* ===== テーマ ===== */
 function resolved(){const t=S.settings.theme;return t==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t}
-function applyTheme(){const r=document.documentElement;const th=resolved();r.dataset.theme=th;r.style.setProperty('--ac',S.settings.accent);r.style.fontSize=(S.settings.font*100)+'%';r.classList.toggle('rm',!!S.settings.reduceMotion);const m=$('meta[name=theme-color]');if(m)m.content=th==='dark'?'#0E0E0D':'#FAFAF9'}
+function applyTheme(){const r=document.documentElement;const th=resolved();r.dataset.theme=th;r.style.setProperty('--ac',S.settings.accent);r.style.fontSize=(S.settings.font*100)+'%';r.classList.toggle('rm',!!S.settings.reduceMotion);const m=$('meta[name=theme-color]');if(m)m.content=th==='dark'?'#24272D':'#FFFFFF'}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(S&&S.settings.theme==='system')applyTheme()});
 function setTheme(next,x,y){const before=resolved();S.settings.theme=next;dirty();const after=resolved();if(before===after||S.settings.reduceMotion||!document.startViewTransition){applyTheme();rerender();return}
  x=x??innerWidth-40;y=y??30;const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));const html=document.documentElement;html.classList.add('vt-theme');
@@ -639,7 +678,7 @@ function exportPng(){const t=T();const dark=resolved()==='dark';const c=document
  const wrap=(s,w)=>{x.font=`30px ${F}`;const out=[];let line='';for(const ch of s){if(x.measureText(line+ch).width>w){out.push(line);line=ch}else line+=ch}out.push(line);return out};
  const L=rows.map(r=>{const lb=labelOf(t,r.n,r.d);x.font=`20px ${M}`;const lw=x.measureText(lb).width+20;const ind=P+r.d*44;return{...r,lb,lw,ind,lines:wrap(r.n.text.trim()||'(未入力)',W-ind-lw-16-P)}});
  const H=P+60+40+40+L.reduce((a,r)=>a+r.lines.length*LH+14,0)+P;c.width=W;c.height=H;
- x.fillStyle=dark?'#0E0E0D':'#FAFAF9';x.fillRect(0,0,W,H);const tx=dark?'#EDEDEA':'#111110',sub=dark?'#8F8E88':'#6B6A65',ln=dark?'#3A3A36':'#D3D1C7',ac=S.settings.accent;
+ x.fillStyle=dark?'#1A1C21':'#ECEEF2';x.fillRect(0,0,W,H);const tx=dark?'#DDE0E6':'#262A31',sub=dark?'#959BA7':'#6A717E',ln=dark?'#454A54':'#C8CDD5',ac=S.settings.accent;
  x.textBaseline='top';x.fillStyle=tx;x.font=`500 44px ${F}`;x.fillText(titleOf(t).slice(0,40),P,P);x.fillStyle=sub;x.font=`20px ${M}`;x.fillText(`${tpl(t).code} · ${STATUS[t.status]} · ${fdate(t.updated)}`,P,P+64);
  let y=P+60+40+40;for(const r of L){x.strokeStyle=r.d===0?ac:ln;x.lineWidth=1.5;x.strokeRect(r.ind,y+6,r.lw,28);x.fillStyle=r.d===0?ac:sub;x.font=`20px ${M}`;x.fillText(r.lb,r.ind+10,y+10);x.fillStyle=tx;x.font=`${r.d===0?'500 ':''}30px ${F}`;r.lines.forEach((l,i)=>x.fillText(l,r.ind+r.lw+16,y+i*LH));y+=r.lines.length*LH+14}
  x.fillStyle=sub;x.font=`18px ${M}`;x.fillText('logitore',W-P-90,H-P+20);
@@ -736,7 +775,7 @@ function renderSettings(){const v=$('#v-settings'),st=S.settings;const seg=(id,o
  $('#s-exp').onclick=exportData;$('#s-imp').onclick=()=>$('#file').click();
  $('#s-per').onclick=async()=>{const g=await requestPersist(true);persistLabel();toast(g?'保存領域は保護されています':'保護は許可されませんでした。アプリをインストールして使うと許可されやすくなります',{ms:4000})};persistLabel();
  $('#s-trash').onclick=()=>go('trash');$('#s-wipe').onclick=wipeAll;$('#s-man').onclick=openManual;$('#s-gl').onclick=()=>glossary();$('#s-ob').onclick=()=>onboarding(true);$('#s-err').onclick=openErrors;$('#s-upd').onclick=checkUpdate;
- $('#s-log').onclick=()=>sheet(`<div class="er"><div class="d">${esc(APP.version)} · trial-2</div><div class="m">テンプレートを6種類に再構成(Whyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-1</div><div class="m">試作版。ホーム・作業画面(アウトライン/ツリー)・ドリル・設定・ゴミ箱・AIに提出・書き出し/読み込み・PINロック・エラーログを実装。「記録」時に v1.0 として確定予定。</div></div>`,{title:'更新履歴'})}
+ $('#s-log').onclick=()=>sheet(`<div class="er"><div class="d">${esc(APP.version)} · trial-3</div><div class="m">見た目を調整。ライト/ダークの色調をやわらげ、余白を詰め、一覧・作業エリア・パネル・設定などを枠(カード)で囲んで見やすくした。PCでの表示幅を広げた。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-2</div><div class="m">テンプレートを6種類に再構成(Whyツリー/Howツリーに分割、メリデメ比較を複数の選択肢を比べる構造に変更)。各テンプレートに使い方(ⓘ)、ビジネス向けサンプル、「迷ったら診断」を追加。</div></div><div class="er"><div class="d">${esc(APP.version)} · trial-1</div><div class="m">試作版。ホーム・作業画面(アウトライン/ツリー)・ドリル・設定・ゴミ箱・AIに提出・書き出し/読み込み・PINロック・エラーログを実装。「記録」時に v1.0 として確定予定。</div></div>`,{title:'更新履歴'})}
 async function persistLabel(){const el=$('#s-per-s');if(!el)return;try{if(navigator.storage&&navigator.storage.persisted){const p=await navigator.storage.persisted();el.textContent=p?'保護済み(容量不足でも自動削除されにくい状態)':'未保護。タップで保護を申請します'}else el.textContent='このブラウザでは確認できません'}catch(_){el.textContent='確認できませんでした'}}
 async function requestPersist(force){try{if(!navigator.storage||!navigator.storage.persist)return false;if(await navigator.storage.persisted())return true;if(!force&&S.meta.persistAsked)return false;S.meta.persistAsked=true;return await navigator.storage.persist()}catch(_){return false}}
 function openErrors(){S.errors.forEach(e=>e.seen=true);dirty();const s=sheet(S.errors.length?S.errors.map(e=>`<div class="er"><div class="d">${fdate(e.t)} · ${esc(e.ctx)}</div><div class="m">${esc(e.msg)}</div>${e.stack?`<div class="s">${esc(e.stack)}</div>`:''}</div>`).join('')+`<div class="btns" style="margin-top:1rem"><button class="btn" id="er-copy">${I('copy')}内容をコピー</button><button class="btn dg" id="er-clr">${I('trash')}ログを消去</button></div>`:'<p style="color:var(--sub);font-size:.88rem">エラーは記録されていません。</p>',{title:'エラーログ',onClose:()=>{if(Nav.view==='home')renderHome(false);else if(Nav.view==='settings')renderSettings()}});
